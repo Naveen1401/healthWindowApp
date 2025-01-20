@@ -19,17 +19,33 @@ const SignIn = () => {
 
     const [request, response, promptAsync] = Google.useAuthRequest(config);
 
+    const handleUserSign = async (user:any) =>{
+        try{
+            const response = await fetch(process.env.EXPO_PUBLIC_BACKEND_SERVER +'/patient/getOrCreatePatient', {
+                method: 'POST',
+                body : JSON.stringify(user),
+                headers: {'Content-Type': 'application/json; charset=UTF-8'}
+            });
+            const apiresponse = await response.json();
+            router.replace('/profile');
+            console.log("APIResponse : ", apiresponse);
+
+        }catch(error){
+            console.log(error);
+        }
+    }
+
     const getUserProfile = async(token:any)=>{
         if(!token) return;
         try{
-            const responce = await fetch('https://www.googleapis.com/userinfo/v2/me', {
+            const response = await fetch('https://www.googleapis.com/userinfo/v2/me', {
                 headers : {
                     Authorization: `Bearer ${token}`
                 }
             });
-            const user = await responce.json();
-            router.replace('/profile');
-            console.log(user);
+            const user = await response.json();
+            handleUserSign(user);
+            console.log("Google User : ",user);
         }catch(error){
             console.log(error);
         }
