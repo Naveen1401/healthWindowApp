@@ -1,24 +1,24 @@
+import React from "react";
 import { Text, SafeAreaView, TouchableOpacity } from 'react-native'
-import React, { useEffect, useState } from 'react'
-import * as WebBrowser from 'expo-web-browser'
+import { useContext, useEffect } from "react";
+import { AuthContext } from "../../context/AuthContext";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Google from 'expo-auth-session/providers/google'
-import { useRouter } from 'expo-router';
+import * as WebBrowser from 'expo-web-browser'
 
 WebBrowser.maybeCompleteAuthSession();
 
-const SignIn = () => {
+export default function AuthScreen() {
     const config = {
         androidClientId: process.env.EXPO_PUBLIC_ANDROID_CLIENT_ID,
         iosClientId: process.env.EXPO_PUBLIC_IOS_CLIENT_ID,
         webClientId: process.env.EXPO_PUBLIC_WEB_CLIENT_ID
     };
 
-    const router = useRouter();
-
-    console.log(config);
+    const { setToken } = useContext(AuthContext);
 
     const [request, response, promptAsync] = Google.useAuthRequest(config);
-
+    
     const handleUserSign = async (user:any) =>{
         try{
             const response = await fetch(process.env.EXPO_PUBLIC_BACKEND_SERVER +'/patient/getOrCreatePatient', {
@@ -27,8 +27,13 @@ const SignIn = () => {
                 headers: {'Content-Type': 'application/json; charset=UTF-8'}
             });
             const apiresponse = await response.json();
-            router.replace('/profile');
-            console.log("APIResponse : ", apiresponse);
+
+            const tokenString:string = await apiresponse?.data?.id.toString();
+
+            await AsyncStorage.setItem("token", tokenString);
+            console.log("token ---->> ", tokenString);
+            
+            setToken(tokenString);
 
         }catch(error){
             console.log(error);
@@ -45,7 +50,7 @@ const SignIn = () => {
             });
             const user = await response.json();
             handleUserSign(user);
-            console.log("Google User : ",user);
+            
         }catch(error){
             console.log(error);
         }
@@ -55,7 +60,7 @@ const SignIn = () => {
         if(response?.type==='success'){
             const {authentication} = response;
             const token = authentication?.accessToken;
-            console.log("Token : ", token);
+            //console.log("Token : ", token);
             getUserProfile(token);
         }
     }
@@ -72,5 +77,3 @@ const SignIn = () => {
         </SafeAreaView>
     )
 }
-
-export default SignIn
