@@ -10,7 +10,8 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.naveen1401.healthWindow"
+      "bundleIdentifier": "com.naveen1401.healthWindow",
+      "usesIcloudStorage": true
     },
     "android": {
       "adaptiveIcon": {

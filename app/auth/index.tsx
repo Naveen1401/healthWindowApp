@@ -15,7 +15,7 @@ export default function AuthScreen() {
         webClientId: process.env.EXPO_PUBLIC_WEB_CLIENT_ID
     };
 
-    const { setToken } = useContext(AuthContext);
+    const { setToken, setUserID } = useContext(AuthContext);
 
     const [request, response, promptAsync] = Google.useAuthRequest(config);
     
@@ -28,12 +28,12 @@ export default function AuthScreen() {
             });
             const apiresponse = await response.json();
 
-            const tokenString:string = await apiresponse?.data?.id.toString();
+            const loginUserID:string = await apiresponse?.data?.id.toString();
 
-            await AsyncStorage.setItem("token", tokenString);
-            console.log("token ---->> ", tokenString);
+            await AsyncStorage.setItem("token", loginUserID);
+            console.log("token ---->> ", loginUserID);
             
-            setToken(tokenString);
+            setUserID(loginUserID);
 
         }catch(error){
             console.log(error);
@@ -60,7 +60,7 @@ export default function AuthScreen() {
         if(response?.type==='success'){
             const {authentication} = response;
             const token = authentication?.accessToken;
-            //console.log("Token : ", token);
+            setToken(token?token:null);
             getUserProfile(token);
         }
     }

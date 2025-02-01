@@ -5,16 +5,18 @@ import "./global.css";
 import { useRouter } from "expo-router";
 
 function Layout() {
-  const { token } = useContext(AuthContext);
+  const { userID, token } = useContext(AuthContext);
   const router = useRouter();
 
   useEffect(() => {
-    if (token) {
+    if (userID) {
       router.replace('/home');  // Navigate to the home route when authenticated
     } else {
       router.replace('/auth');  // Navigate to the auth route when not authenticated
     }
-  }, [token, router]);
+    console.log("Auth detials:::::::::::::::::::::>",userID, token);
+    
+  }, [userID, router]);
 
   return <Stack screenOptions={{ headerShown: false }} />;
 }

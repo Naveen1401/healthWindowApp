@@ -11,7 +11,8 @@ export default function HomeScreen() {
     <SafeAreaView>
       <Text>Welcome to the Home Screen</Text>
       <Button title="Profile" onPress={() => router.push('/home/profile')} />
-        <TouchableOpacity onPress={logout}>
+      <Button title="Reports" onPress={() => router.push('/home/myReports')} />
+      <TouchableOpacity onPress={logout}>
         <Text style={{ color: 'blue', marginTop: 20 }}>Logout</Text>
       </TouchableOpacity>
     </SafeAreaView>
