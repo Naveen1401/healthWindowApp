@@ -3,16 +3,17 @@ import { View, Text, Button, TextInput, Platform, Alert } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { AuthContext } from '@/context/AuthContext';
+import AccessibilityAndAffiliationForReport from './AccessibilityAndAffiliationForReport';
 
 const UploadReport = () => {
     const [reportName, setReportName] = useState(''); // State for the report name
     const [selectedFile, setSelectedFile] = useState<any>(null);
     const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
     const [showDatePicker, setShowDatePicker] = useState(false);
+    const [openModel, setOpneModel] = useState(false);
 
     const {userID} = useContext(AuthContext);
 
-    // Handle file selection
     const pickDocument = async () => {
         try {
             const result = await DocumentPicker.getDocumentAsync({
@@ -35,7 +36,6 @@ const UploadReport = () => {
         }
     };
 
-    // Handle file upload
     const uploadData = async () => {
         if (!reportName.trim() || !selectedFile || !selectedDate) {
             Alert.alert('Error', 'Please enter a report name, select a file, and choose a date');
@@ -70,7 +70,10 @@ const UploadReport = () => {
             });
 
             if (response.ok) {
-                Alert.alert('Success', 'File uploaded successfully');
+                Alert.alert('Success', 'File uploaded successfully',[{
+                    text: 'ok',
+                    onPress: () => setOpneModel(true),
+                }]);
                 setReportName(''); // Clear input field
                 setSelectedFile(null); // Clear selected file
                 setSelectedDate(undefined); // Clear selected date
@@ -99,7 +102,7 @@ const UploadReport = () => {
                 }}
             />
 
-            <Button title="Pick PDF File" onPress={pickDocument} />
+            <Button title="Select Report" onPress={pickDocument} />
 
             {selectedFile && (
                 <View style={{ marginTop: 20 }}>
@@ -128,6 +131,7 @@ const UploadReport = () => {
             )}
 
             <Button title="Upload" onPress={uploadData} />
+            <AccessibilityAndAffiliationForReport id={1} openModel={openModel} setOpenModel={setOpneModel}/>
         </View>
     );
 };

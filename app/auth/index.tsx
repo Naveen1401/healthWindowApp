@@ -30,8 +30,8 @@ export default function AuthScreen() {
 
             const loginUserID:string = await apiresponse?.data?.id.toString();
 
-            await AsyncStorage.setItem("token", loginUserID);
-            console.log("token ---->> ", loginUserID);
+            await AsyncStorage.setItem("userID", loginUserID);
+            console.log("UserID ---->> ", loginUserID);
             
             setUserID(loginUserID);
 
@@ -42,6 +42,7 @@ export default function AuthScreen() {
 
     const getUserProfile = async(token:any)=>{
         if(!token) return;
+        await AsyncStorage.setItem("token", token);
         try{
             const response = await fetch('https://www.googleapis.com/userinfo/v2/me', {
                 headers : {
