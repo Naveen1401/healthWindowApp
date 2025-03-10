@@ -66,43 +66,39 @@ const AccessibilityAndAffiliationForReport: React.FC<AccessibilityAndAffiliation
     };
 
     return (
-        <SafeAreaView style={styles.container}>
-            <Modal
-                visible={openModel??reportAccessModelVisibility}
-                transparent={true}
-                animationType="slide"
-            >
-                <View style={styles.modalContainer}>
-                    <View style={styles.modalContent}>
-                        <Text style={styles.modalTitle}>Select Doctors</Text>
-                        <SelectionBox listText ={"All doctors"} 
-                                    status = {selectedDoctors.length === doctorData.length ? true : false}
-                                    pressHandler={()=>toggleSelection(-1)}
-                                    />
-                        <FlatList
-                            data={doctorData}
-                            keyExtractor={(item) => item.id.toString()}
-                            renderItem={({ item }) => (
-                                <SelectionBox listText ={`${item.firstName} ${item.lastName}`} 
-                                    status = {selectedDoctors.includes(item.id) ? true : false}
-                                    pressHandler={()=>toggleSelection(item.id)}
-                                    />
-                            )}
-                        />
+        <Modal
+            visible={openModel ?? reportAccessModelVisibility}
+            transparent={true}
+            animationType="slide"
+        >
+            <View style={styles.modalContainer}>
+                <View style={styles.modalContent}>
+                    <Text style={styles.modalTitle}>Select Doctors</Text>
+                    
+                    <SelectionBox 
+                        listText="All doctors" 
+                        status={selectedDoctors.length === doctorData.length} 
+                        pressHandler={() => toggleSelection(-1)}
+                    />
 
-                        <Pressable style={styles.closeButton} onPress={modelClosingHandler}>
-                            <Text style={styles.buttonText}>Close Modal</Text>
-                        </Pressable>
-                    </View>
+                    <FlatList
+                        data={doctorData}
+                        keyExtractor={(item) => item.id.toString()}
+                        renderItem={({ item }) => (
+                            <SelectionBox 
+                                listText={`${item.firstName} ${item.lastName}`} 
+                                status={selectedDoctors.includes(item.id)} 
+                                pressHandler={() => toggleSelection(item.id)}
+                            />
+                        )}
+                    />
+
+                    <Pressable style={styles.closeButton} onPress={modelClosingHandler}>
+                        <Text style={styles.buttonText}>Close Modal</Text>
+                    </Pressable>
                 </View>
-            </Modal>
-
-            {!setOpenModel && (
-                <Pressable style={styles.openButton} onPress={() => setReportAccessModelVisibility(true)}>
-                    <Text style={styles.buttonText}>Open Modal</Text>
-                </Pressable>
-            )}
-        </SafeAreaView>
+            </View>
+        </Modal>
     );
 }
 
@@ -113,10 +109,14 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     modalContainer: {
-        flex: 1,
+        position: 'absolute', // Removes it from normal layout flow
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'rgba(0,0,0,0.5)',
+        backgroundColor: 'rgba(0,0,0,0.5)', // Dark overlay for better visibility
     },
     modalContent: {
         width: 300,

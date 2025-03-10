@@ -3,6 +3,19 @@ import React, { useContext, useEffect } from "react";
 import { AuthProvider, AuthContext } from "../context/AuthContext";
 import "./global.css";
 import { useRouter } from "expo-router";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+// Create a QueryClient instance
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // Data is considered fresh for 5 minutes
+      gcTime: 1000 * 60 * 10, // Data is cached for 10 minutes
+      retry: 2, // Retry failed requests twice
+      refetchOnWindowFocus: false, // Disable refetch on window focus (React Native doesn't have a "window")
+    },
+  },
+});
 
 function Layout() {
   const { userID, token } = useContext(AuthContext);
@@ -23,8 +36,10 @@ function Layout() {
 
 export default function RootLayout() {
   return (
-    <AuthProvider>
-      <Layout />
-    </AuthProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <Layout />
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }

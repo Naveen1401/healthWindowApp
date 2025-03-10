@@ -3,13 +3,7 @@ import React from 'react'
 
 const Profile = () => {
   return (
-    <SafeAreaView className='h-full flex justify-center items-center'
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
+    <SafeAreaView>
       <Text className="font-bold">Hi, you sick motherfucking bastard</Text>
     </SafeAreaView>
   )

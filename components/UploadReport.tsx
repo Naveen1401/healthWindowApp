@@ -1,16 +1,18 @@
 import React, { useContext, useState } from 'react';
-import { View, Text, Button, TextInput, Platform, Alert } from 'react-native';
+import { View,SafeAreaView, Text, Button, TextInput, Alert, Platform, StyleSheet, Pressable } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { AuthContext } from '@/context/AuthContext';
 import AccessibilityAndAffiliationForReport from './AccessibilityAndAffiliationForReport';
+import DatePicker from 'react-native-date-picker'
+import GlobalStyleSheet from '@/app/globalStyle';
 
 const UploadReport = () => {
     const [reportName, setReportName] = useState(''); // State for the report name
     const [selectedFile, setSelectedFile] = useState<any>(null);
-    const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
-    const [showDatePicker, setShowDatePicker] = useState(false);
+    const [selectedDate, setSelectedDate] = useState<Date>(new Date());
     const [openModel, setOpneModel] = useState(false);
+    const [open, setOpen] = useState(false)
 
     const {userID} = useContext(AuthContext);
 
@@ -29,8 +31,8 @@ const UploadReport = () => {
         }
     };
 
-    const onDateChange = (event: any, date?: Date) => {
-        setShowDatePicker(false); // Hide the date picker
+    const onDateChange = (date: Date) => {
+        console.log(date)
         if (date) {
             setSelectedDate(date);
         }
@@ -76,7 +78,7 @@ const UploadReport = () => {
                 }]);
                 setReportName(''); // Clear input field
                 setSelectedFile(null); // Clear selected file
-                setSelectedDate(undefined); // Clear selected date
+                setSelectedDate(new Date()); // Clear selected date
             } else {
                 const errorResponse = await response.json();
                 Alert.alert('Error', `Upload failed: ${errorResponse.message || 'Unknown error'}`);
@@ -87,53 +89,74 @@ const UploadReport = () => {
     };
 
     return (
-        <View style={{ flex: 1, justifyContent: 'center', padding: 20 }}>
-            <Text>Enter Report Name:</Text>
+        <SafeAreaView style = {style.uploadReportMainContainer}>
+            <Text style = {GlobalStyleSheet.subHeading}>Upload Report</Text>
+            <Pressable style={style.uploadWidgetContainer} onPress={pickDocument}>
+                {!selectedFile?<Text>^ Select Report</Text>:
+                <View style={style.selectedFileView}>
+                    <Text>{selectedFile.name}</Text>
+                    <Button title="x" onPress={()=>(setSelectedFile(null))}/>
+                </View>}
+            </Pressable>
             <TextInput
                 value={reportName}
                 onChangeText={setReportName}
                 placeholder="Enter report name"
-                style={{
-                    borderWidth: 1,
-                    borderColor: 'gray',
-                    padding: 10,
-                    marginVertical: 10,
-                    borderRadius: 5
-                }}
+                style={style.reportNameInput}
             />
+            <View >
+                <Button title={`Report Date: ${selectedDate.toLocaleDateString()}`} onPress={() => setOpen(true)} />
+                <DatePicker
+                    modal
+                    open={open}
+                    date={selectedDate}
+                    mode='date'
+                    onConfirm={(date) => {
+                        setOpen(false)
+                        onDateChange(date)
+                    }}
+                    onCancel={() => {
+                        setOpen(false)
+                    }}
+                />
+            </View>
 
-            <Button title="Select Report" onPress={pickDocument} />
-
-            {selectedFile && (
-                <View style={{ marginTop: 20 }}>
-                    <Text>Selected File: {selectedFile.name}</Text>
-                </View>
-            )}
-
-            <Button title="Select Date" onPress={() => setShowDatePicker(true)} />
-
-            {selectedDate && (
-                <View style={{ marginTop: 20 }}>
-                    <Text>Selected Date: {selectedDate.toLocaleDateString()}</Text>
-                </View>
-            )}
-
-            {showDatePicker && (
-                <View style={{ minWidth: 280, alignSelf: 'center', padding: 10 }}>
-                    <DateTimePicker
-                        value={selectedDate || new Date()}
-                        mode="date"
-                        display={Platform.OS === 'ios' ? 'inline' : 'default'}
-                        onChange={onDateChange}
-                        style={{ width: '100%' }}
-                    />
-                </View>
-            )}
-
-            <Button title="Upload" onPress={uploadData} />
+            <Button color="#4ba0eb" title="Upload" onPress={uploadData} />
             <AccessibilityAndAffiliationForReport id={1} openModel={openModel} setOpenModel={setOpneModel}/>
-        </View>
+        </SafeAreaView>
     );
 };
+
+const style = StyleSheet.create({
+    uploadReportMainContainer:{
+        margin:20,
+        backgroundColor: "#ff8267",
+        borderRadius:10
+    },
+    uploadWidgetContainer:{
+        paddingVertical: 30,
+        marginHorizontal: 20,
+        borderRadius:10,
+        borderWidth:2,
+        borderColor:"#eaeaea",
+        borderStyle:"dashed",
+        display:"flex",
+        justifyContent:"center",
+        alignItems:"center"
+    },
+    reportNameInput:{
+        borderWidth: 1,
+        borderColor: 'gray',
+        padding: 10,
+        margin: 20,
+        borderRadius: 5,
+        textAlign: "center"
+    },
+    selectedFileView:{
+        display:"flex",
+        flexDirection: "row",
+        alignItems:"center"
+    },
+});
 
 export default UploadReport;
