@@ -12,6 +12,7 @@ const UploadReport = () => {
     const [selectedFile, setSelectedFile] = useState<any>(null);
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
     const [openModel, setOpneModel] = useState(false);
+    const [reportID, setReportID] = useState<any>(null);
     const [open, setOpen] = useState(false)
 
     const {userID} = useContext(AuthContext);
@@ -70,15 +71,20 @@ const UploadReport = () => {
                 },
                 body: payloadForm,
             });
+            
+            const responseData = await response.json();
 
             if (response.ok) {
                 Alert.alert('Success', 'File uploaded successfully',[{
                     text: 'ok',
-                    onPress: () => setOpneModel(true),
+                    onPress: () => {
+                        setOpneModel(true);
+                        setReportID(responseData.data.id);
+                    },
                 }]);
-                setReportName(''); // Clear input field
-                setSelectedFile(null); // Clear selected file
-                setSelectedDate(new Date()); // Clear selected date
+                setReportName('');
+                setSelectedFile(null);
+                setSelectedDate(new Date());
             } else {
                 const errorResponse = await response.json();
                 Alert.alert('Error', `Upload failed: ${errorResponse.message || 'Unknown error'}`);
@@ -122,7 +128,7 @@ const UploadReport = () => {
             </View>
 
             <Button color="#4ba0eb" title="Upload" onPress={uploadData} />
-            <AccessibilityAndAffiliationForReport id={1} openModel={openModel} setOpenModel={setOpneModel}/>
+            <AccessibilityAndAffiliationForReport id={1} openModel={openModel} setOpenModel={setOpneModel} uploadedReportID = {reportID}/>
         </SafeAreaView>
     );
 };
@@ -130,7 +136,7 @@ const UploadReport = () => {
 const style = StyleSheet.create({
     uploadReportMainContainer:{
         margin:20,
-        backgroundColor: "#ff8267",
+        backgroundColor: "white",
         borderRadius:10
     },
     uploadWidgetContainer:{
@@ -138,7 +144,7 @@ const style = StyleSheet.create({
         marginHorizontal: 20,
         borderRadius:10,
         borderWidth:2,
-        borderColor:"#eaeaea",
+        borderColor:"gray",
         borderStyle:"dashed",
         display:"flex",
         justifyContent:"center",

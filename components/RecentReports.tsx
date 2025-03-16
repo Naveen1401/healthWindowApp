@@ -1,15 +1,18 @@
-import { SafeAreaView, Text, Alert, ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
-import React, { useContext } from 'react';
+import { SafeAreaView, Text, Alert, ActivityIndicator, Pressable, StyleSheet, View, VirtualizedList, ScrollView } from 'react-native';
+import React, { useContext, useState } from 'react';
 import { AuthContext } from '@/context/AuthContext';
 import { useQuery } from '@tanstack/react-query';
-import GlobalStyleSheet from '@/app/globalStyle';
+import AccessibilityAndAffiliationForReport from './AccessibilityAndAffiliationForReport';
 
 const RecentReports = () => {
     const { userID } = useContext(AuthContext);
+    const [selectedReportID, setSelectedReportID] = useState<number | null>(null);
+    const [openModel, setOpneModel] = useState(false);
 
-    const handleReportClick = (reportID:number) =>{
-        Alert.alert("HI", "Report is clicked with ID" + reportID);
-    }
+    const handleReportClick = (reportID: number) => {
+        setSelectedReportID(reportID);
+        setOpneModel(true);
+    };
 
     // Fetch all reports using React Query
     const { data, isLoading, isError, error } = useQuery({
@@ -43,7 +46,7 @@ const RecentReports = () => {
     // Show loading indicator while fetching data
     if (isLoading) {
         return (
-            <SafeAreaView>
+            <SafeAreaView style={style.recentReportsContainer}>
                 <ActivityIndicator size="large" color="#0000ff" />
             </SafeAreaView>
         );
@@ -52,7 +55,7 @@ const RecentReports = () => {
     // Show error message if fetching fails
     if (isError) {
         return (
-            <SafeAreaView>
+            <SafeAreaView style={style.recentReportsContainer}>
                 <Text>Error: {error.message}</Text>
             </SafeAreaView>
         );
@@ -61,7 +64,7 @@ const RecentReports = () => {
     // Show message if userID is not defined
     if (!userID) {
         return (
-            <SafeAreaView>
+            <SafeAreaView style={style.recentReportsContainer}>
                 <Text>User is not defined. Please log in.</Text>
             </SafeAreaView>
         );
@@ -69,37 +72,71 @@ const RecentReports = () => {
 
     // Render the fetched data
     return (
-        <SafeAreaView style = {style.recentReportsContainer}>
-            <Text style= {style.recentReportHeading}>Recent Reports:</Text>
-            <View style = {style.recentReportListContainer}>
-                {data.slice(0,5).map((rep:any) => (
-                    <Pressable
-                        key={rep.id}
-                        onPress={() => handleReportClick(rep.id)}
-                        style={GlobalStyleSheet.reportTab}
-                    >
-                        <Text className='text-[#5288d9]'>{rep.reportName.toString()}</Text>
-                        <Text className='text-[#5288d9]'>{rep.reportDate}</Text>
-                    </Pressable>
+        <SafeAreaView style={style.recentReportsContainer}>
+            <Text style={style.recentReportHeading}>Recent Reports:</Text>
+            <ScrollView style={style.recentReportListContainer}>
+                {data.map((rep: any) => (
+                    <View key={rep.id} style={style.reportTab}>
+                        <Pressable
+                            key={rep.id}
+                            onPress={() => handleReportClick(rep.id)}
+                            style={style.reportDetails}
+                        >
+                            <Text className='text-[#5288d9]'>{rep.reportName.toString()}</Text>
+                            <Text className='text-[#5288d9]'>{rep.reportDate}</Text>
+                        </Pressable>
+                        <Pressable onPress={()=>(console.log("View report" + rep.id))} style = {style.eyeContainer}>
+                            <Text className='text-[#5288d9]'>Eye</Text>
+                        </Pressable>
+                    </View>
                 ))}
-            </View>
+            </ScrollView>
+            {selectedReportID && (
+                <AccessibilityAndAffiliationForReport openModel={openModel} setOpenModel={setOpneModel} uploadedReportID={selectedReportID} id={1} />
+            )}
         </SafeAreaView>
     );
 };
 
 const style = StyleSheet.create({
-    recentReportsContainer : {
+    recentReportsContainer: {
         margin: 10,
         height: "50%"
     },
-    recentReportHeading:{
-        fontSize:16,
-        fontWeight:"500",
+    recentReportHeading: {
+        fontSize: 16,
+        fontWeight: "500",
         padding: 10,
     },
-    recentReportListContainer : {
-        paddingHorizontal:10
+    recentReportListContainer: {
+        paddingHorizontal: 10
     },
+    reportTab : {
+        display:"flex",
+        flexDirection: "row",
+        width: "100%",
+        padding:10,
+        borderRadius: 10,
+        borderColor: "#d8d8d8",
+        backgroundColor: "white",
+        borderWidth:2,
+        marginBottom:10,
+    },
+    reportDetails : {
+        display: "flex",
+        flexDirection: "row",
+        justifyContent: "space-between",
+        flex: 8,
+        borderRightWidth: 1,
+        paddingRight: 7
+    },
+    eyeContainer : {
+        display: "flex",
+        flexDirection: "row",
+        flex:1,
+        justifyContent: "center",
+        
+    }
 });
 
 export default RecentReports;

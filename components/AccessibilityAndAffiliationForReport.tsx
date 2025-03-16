@@ -14,25 +14,36 @@ type AccessibilityAndAffiliationForReportProps = {
     id: number;
     openModel?: boolean,
     setOpenModel?: (visible:boolean)=>void;
+    uploadedReportID : any
 };
 
 
 type Doctor = {
     id: number;
-    firstName: string;
-    lastName: string;
+    name: string;
 };
 
-const AccessibilityAndAffiliationForReport: React.FC<AccessibilityAndAffiliationForReportProps> = ({ id, openModel, setOpenModel }) => {
+const AccessibilityAndAffiliationForReport: React.FC<AccessibilityAndAffiliationForReportProps> = ({ id, openModel, setOpenModel, uploadedReportID }) => {
     const [reportAccessModelVisibility, setReportAccessModelVisibility] = useState(false);
     const [doctorData, setDoctorData] = useState<Doctor[]>([]);
     const [selectedDoctors, setSelectedDoctors] = useState<number[]>([]);
 
     const fetchData = async () => {
         try {
-            const response = await fetch('https://dummyjson.com/users');
+            const response = await fetch(process.env.EXPO_PUBLIC_BACKEND_SERVER + '/patient/myDoctors',{
+                method: "GET",
+                headers : {
+                    "Patient-Id": id.toString(),
+                },
+                redirect: "follow"
+            });
             const json = await response.json();
-            setDoctorData(json.users);
+            const transformedData = json?.data?.map((item:any )=> ({
+                id:item.userId,
+                name: item.doctorDetails.name
+            }))
+            console.log(transformedData);
+            setDoctorData(transformedData);
         } catch (error) {
             console.error("Error fetching data:", error);
         }
@@ -52,7 +63,7 @@ const AccessibilityAndAffiliationForReport: React.FC<AccessibilityAndAffiliation
 
     const toggleSelection = (id: number) => {
         if(id===-1){
-            selectedDoctors.length !== doctorData.length ?setSelectedDoctors(doctorData.map(doc=>doc.id)): setSelectedDoctors([]);
+            selectedDoctors?.length !== doctorData?.length ?setSelectedDoctors(doctorData.map(doc=>doc.id)): setSelectedDoctors([]);
         }else{
             setSelectedDoctors((prevSelected) =>
                 prevSelected.includes(id) 
@@ -64,6 +75,8 @@ const AccessibilityAndAffiliationForReport: React.FC<AccessibilityAndAffiliation
         console.log(id);
         
     };
+
+    if(doctorData.length===0) return;
 
     return (
         <Modal
@@ -77,7 +90,7 @@ const AccessibilityAndAffiliationForReport: React.FC<AccessibilityAndAffiliation
                     
                     <SelectionBox 
                         listText="All doctors" 
-                        status={selectedDoctors.length === doctorData.length} 
+                        status={selectedDoctors?.length === doctorData?.length} 
                         pressHandler={() => toggleSelection(-1)}
                     />
 
@@ -86,7 +99,7 @@ const AccessibilityAndAffiliationForReport: React.FC<AccessibilityAndAffiliation
                         keyExtractor={(item) => item.id.toString()}
                         renderItem={({ item }) => (
                             <SelectionBox 
-                                listText={`${item.firstName} ${item.lastName}`} 
+                                listText={`${item.name}`} 
                                 status={selectedDoctors.includes(item.id)} 
                                 pressHandler={() => toggleSelection(item.id)}
                             />
@@ -94,7 +107,7 @@ const AccessibilityAndAffiliationForReport: React.FC<AccessibilityAndAffiliation
                     />
 
                     <Pressable style={styles.closeButton} onPress={modelClosingHandler}>
-                        <Text style={styles.buttonText}>Close Modal</Text>
+                        <Text style={styles.buttonText}>Close Modal{uploadedReportID}</Text>
                     </Pressable>
                 </View>
             </View>
