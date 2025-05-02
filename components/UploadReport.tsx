@@ -1,7 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { View,SafeAreaView, Text, Button, TextInput, Alert, Platform, StyleSheet, Pressable } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { AuthContext } from '@/context/AuthContext';
 import AccessibilityAndAffiliationForReport from './AccessibilityAndAffiliationForReport';
 import DatePicker from 'react-native-date-picker'

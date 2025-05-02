@@ -1,24 +1,22 @@
-import { Text,SafeAreaView, StyleSheet} from 'react-native'
+import { Text, SafeAreaView, StyleSheet, View } from 'react-native'
 import React from 'react'
-import UploadReport from '@/components/UploadReport'
-import RecentReports from '@/components/RecentReports'
+import AllReports from '@/components/AllReports'
 import GlobalStyleSheet from '../globalStyle'
 
 const MyReports = () => {
-  return (
-    <SafeAreaView style={style.myRportsMainContainer}>
-      <Text style= {GlobalStyleSheet.mainHeading}>My Reports</Text>
-      <UploadReport/>
-      <RecentReports/>
-    </SafeAreaView>
-  )
+    return (
+        <SafeAreaView style={style.myReportsMainContainer}>
+            <Text style={GlobalStyleSheet.mainHeading}>My Reports</Text>
+            <AllReports searchFlag={true} />
+        </SafeAreaView>
+    )
 }
 
 const style = StyleSheet.create({
-  myRportsMainContainer : {
-    backgroundColor: "#dce6fc",
-    height:"100%"
-  }
+    myReportsMainContainer: {
+        backgroundColor: "#dce6fc",
+        height: "100%",
+    }
 });
 
 export default MyReports

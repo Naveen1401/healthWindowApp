@@ -4,8 +4,7 @@ const GlobalStyleSheet = StyleSheet.create({
     mainHeading:{
         fontSize:20,
         fontWeight:"bold",
-        margin: "auto",
-        paddingBottom: 20, 
+        textAlign: "center",
         paddingTop: 10,
         color: "black"
     },
