@@ -5,7 +5,7 @@ const GlobalStyleSheet = StyleSheet.create({
         fontSize:20,
         fontWeight:"bold",
         textAlign: "center",
-        paddingTop: 10,
+        paddingVertical: 10,
         color: "black"
     },
     subHeading:{

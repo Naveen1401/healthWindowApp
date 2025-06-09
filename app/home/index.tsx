@@ -1,22 +1,113 @@
 import React, {useContext} from "react";
-import { SafeAreaView, Text, Button, TouchableOpacity } from "react-native";
+import { SafeAreaView, View, Text, Button, StyleSheet, Image, TouchableOpacity, ImageSourcePropType } from "react-native";
 import { useRouter } from "expo-router";
+import { ReportSVG, MedicationSVGs, HealthDataSVG, MedicationTrackerSVG } from "@/assets/svgComponents/generalSVGs";
 import { AuthContext } from "@/context/AuthContext";
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { logout } = useContext(AuthContext);
+  const { name, imageURL} = useContext(AuthContext);
 
   return (
     <SafeAreaView>
-      <Text>Welcome to the Home Screen</Text>
-      <Button title="Profile" onPress={() => router.push('/home/profile')} />
-      <Button title="Reports" onPress={() => router.push('/home/uploadReports')} />
-      <Button title="Medication" onPress={() => router.push('/home/medication')} />
-      <Button title="My Medication" onPress={() => router.push('/home/myMedication')} />
-      <TouchableOpacity onPress={logout}>
-        <Text style={{ color: 'blue', marginTop: 20 }}>Logout</Text>
+      <View style={styles.welcomeContainer}>
+        <Text style={styles.mainHeading}>{name}! 👋🏽 </Text>
+        <TouchableOpacity style={styles.profileIcon} onPress={() => router.push('/home/profile')}>
+          <Image 
+            source={imageURL
+                  ? { uri: imageURL }
+                  : require('@/assets/images/profileIcon.png') // fallback to local image
+            }
+            style={styles.image}
+            resizeMode="cover"
+          />
+        </TouchableOpacity>
+      </View>
+      <TouchableOpacity onPress={() => router.push('/home/uploadReports')} style={styles.reportsTab}>
+        <ReportSVG transform={'rotate(350)'} height={80} width={80} />
+        <Text style={{color:"white", fontSize: 20, fontWeight: "600", marginLeft:15}}>Report</Text>
       </TouchableOpacity>
+      <TouchableOpacity onPress={() => router.push('/home/medication')} style={styles.medicationTrakerTab}>
+        <MedicationTrackerSVG transform={'rotate(350)'} height={80} width={80} />
+        <Text style={{ color: "white", fontSize: 20, fontWeight: "600", marginLeft: 15 }}>Medication </Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => router.push('/home/myMedication')} style={styles.medicationTab}>
+        <MedicationSVGs transform={'rotate(350)'} height={80} width={80} />
+        <Text style={{ color: "white", fontSize: 20, fontWeight: "600", marginLeft: 15 }}>Medication </Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => router.push('/home/healthData')} style={styles.healthDataTab}>
+        <HealthDataSVG transform={'rotate(350)'} height={80} width={80} />
+        <Text style={{ color: "white", fontSize: 20, fontWeight: "600", marginLeft: 15 }}>Health Data</Text>
+      </TouchableOpacity>
+      
     </SafeAreaView>
   );
 }
+const styles = StyleSheet.create({
+  welcomeContainer:{
+    height: 50,
+    justifyContent: "center",
+    alignItems: 'center',
+  },
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  image: {
+    width: 40,
+    height: 40,
+    borderRadius: 100,
+    borderColor: "#292d33",
+    borderWidth: 3
+  },
+  profileIcon:{
+    position:"absolute",
+    right: 20
+  },
+  mainHeading: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "black",
+  },
+  reportsTab:{
+    backgroundColor:"#00b4d8",
+    alignItems:"center",
+    flexDirection:"row",
+    padding: 20,
+    justifyContent:"center",
+    marginHorizontal: 20,
+    marginVertical: 10,
+    borderRadius: 20
+  },
+  medicationTab: {
+    backgroundColor: "#ade8f4",
+    alignItems: "center",
+    flexDirection: "row",
+    padding: 20,
+    justifyContent: "center",
+    marginHorizontal: 20,
+    marginVertical: 10,
+    borderRadius: 20
+  },
+  medicationTrakerTab: {
+    backgroundColor: "#90e0ef",
+    alignItems: "center",
+    flexDirection: "row",
+    padding: 20,
+    justifyContent: "center",
+    marginHorizontal: 20,
+    marginVertical: 10,
+    borderRadius: 20
+  },
+  healthDataTab: {
+    backgroundColor: "#caf0f8",
+    alignItems: "center",
+    flexDirection: "row",
+    padding: 20,
+    justifyContent: "center",
+    marginHorizontal: 20,
+    marginVertical: 10,
+    borderRadius: 20
+  }
+});

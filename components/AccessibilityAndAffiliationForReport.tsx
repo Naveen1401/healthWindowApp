@@ -1,69 +1,39 @@
 import { 
     Text, 
-    SafeAreaView, 
     Modal, 
-    Pressable, 
     View, 
     StyleSheet, 
-    FlatList 
+    FlatList, 
+    Button
 } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useState } from 'react';
 import SelectionBox from './SelectionBox';
+import useApi from '@/CustomHooks/useCallAPI';
+import { AuthContext } from '@/context/AuthContext';
+
 
 type AccessibilityAndAffiliationForReportProps = {
-    id: number;
+    doctors: Doctor[] ;
     openModel?: boolean,
-    setOpenModel?: (visible:boolean)=>void;
-    uploadedReportID : any
+    setOpenModel: (visible:boolean)=>void;
+    reportID : number
 };
-
 
 type Doctor = {
     id: number;
-    name: string;
+    firstName: string;
+    lastName: string;
 };
 
-const AccessibilityAndAffiliationForReport: React.FC<AccessibilityAndAffiliationForReportProps> = ({ id, openModel, setOpenModel, uploadedReportID }) => {
-    const [reportAccessModelVisibility, setReportAccessModelVisibility] = useState(false);
-    const [doctorData, setDoctorData] = useState<Doctor[]>([]);
+const AccessibilityAndAffiliationForReport: React.FC<AccessibilityAndAffiliationForReportProps> = ({ doctors, openModel, setOpenModel, reportID }) => {
     const [selectedDoctors, setSelectedDoctors] = useState<number[]>([]);
-
-    const fetchData = async () => {
-        try {
-            const response = await fetch(process.env.EXPO_PUBLIC_BACKEND_SERVER + '/patient/myDoctors',{
-                method: "GET",
-                headers : {
-                    "Patient-Id": id.toString(),
-                },
-                redirect: "follow"
-            });
-            const json = await response.json();
-            const transformedData = json?.data?.map((item:any )=> ({
-                id:item.userId,
-                name: item.doctorDetails.name
-            }))
-            console.log(transformedData);
-            setDoctorData(transformedData);
-        } catch (error) {
-            console.error("Error fetching data:", error);
-        }
-    };
-
-    const modelClosingHandler = () =>{
-        if(setOpenModel){
-            setOpenModel(false);
-        }else{
-            setReportAccessModelVisibility(false);
-        }
-    }
-
-    useEffect(() => {
-        fetchData();
-    }, []);
+    const {callApi} = useApi();
+    const [isLoading, setIsLoading] = useState(false);
+    const {userID} = useContext(AuthContext);
 
     const toggleSelection = (id: number) => {
         if(id===-1){
-            selectedDoctors?.length !== doctorData?.length ?setSelectedDoctors(doctorData.map(doc=>doc.id)): setSelectedDoctors([]);
+            selectedDoctors?.length !== doctors?.length ? setSelectedDoctors(doctors.map(doc=>doc.id)): setSelectedDoctors([]);
         }else{
             setSelectedDoctors((prevSelected) =>
                 prevSelected.includes(id) 
@@ -71,16 +41,42 @@ const AccessibilityAndAffiliationForReport: React.FC<AccessibilityAndAffiliation
                     : [...prevSelected, id] 
             );
         }
-        
-        console.log(id);
-        
     };
 
-    if(doctorData.length===0) return;
+    if (doctors.length===0) {
+        return;
+    };
+
+    const handleAffiliacation = async () => {
+        setIsLoading(true);
+        try {
+            const response = await callApi({
+                url: `${process.env.EXPO_PUBLIC_BACKEND_SERVER}/patient/accessibilityAndAffiliationForReport`,
+                method: "POST",
+                headers: {
+                    "Patient-Id": userID ?? "-1"
+                },
+                body: {
+                    report_id: reportID,
+                    all_doctors: false,
+                    specific_accessibility_doctor_ids: selectedDoctors
+                }
+            });
+
+            console.log("API Response:", response);
+            setOpenModel(false); // Close modal on success
+            setSelectedDoctors([]); // Reset selections
+        } catch (error) {
+            console.error("API Error:", error);
+            // Optionally show error to user (e.g., using Alert)
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     return (
         <Modal
-            visible={openModel ?? reportAccessModelVisibility}
+            visible={openModel}
             transparent={true}
             animationType="slide"
         >
@@ -90,25 +86,37 @@ const AccessibilityAndAffiliationForReport: React.FC<AccessibilityAndAffiliation
                     
                     <SelectionBox 
                         listText="All doctors" 
-                        status={selectedDoctors?.length === doctorData?.length} 
+                        status={selectedDoctors?.length === doctors?.length} 
                         pressHandler={() => toggleSelection(-1)}
                     />
 
                     <FlatList
-                        data={doctorData}
+                        data={doctors}
                         keyExtractor={(item) => item.id.toString()}
                         renderItem={({ item }) => (
                             <SelectionBox 
-                                listText={`${item.name}`} 
+                                listText={`${item.firstName} ${item.lastName}`} 
                                 status={selectedDoctors.includes(item.id)} 
                                 pressHandler={() => toggleSelection(item.id)}
                             />
                         )}
                     />
-
-                    <Pressable style={styles.closeButton} onPress={modelClosingHandler}>
-                        <Text style={styles.buttonText}>Close Modal{uploadedReportID}</Text>
-                    </Pressable>
+                    <View style={styles.activityContainer}>
+                        <Button
+                            title={isLoading ? 'Saving...' : 'Save'}
+                            onPress={handleAffiliacation}
+                            disabled={isLoading}
+                        />
+                        <Button
+                            color="red"
+                            title='Close'
+                            onPress={() => {
+                                setOpenModel(false);
+                                setSelectedDoctors([]);
+                            }}
+                            disabled={isLoading}
+                        />
+                    </View>
                 </View>
             </View>
         </Modal>
@@ -120,9 +128,10 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
+        
     },
     modalContainer: {
-        position: 'absolute', // Removes it from normal layout flow
+        position: 'absolute',
         top: 0,
         left: 0,
         right: 0,
@@ -136,7 +145,7 @@ const styles = StyleSheet.create({
         padding: 20,
         backgroundColor: 'white',
         borderRadius: 10,
-        height: 500
+        height: 500,
     },
     modalTitle: {
         fontSize: 18,
@@ -176,6 +185,10 @@ const styles = StyleSheet.create({
         display: 'flex',
         flexDirection: 'row',
         justifyContent:'center',
+    },
+    activityContainer:{
+        flexDirection:"row",
+        justifyContent: "space-between",
     }
 });
 

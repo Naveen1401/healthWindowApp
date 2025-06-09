@@ -1,13 +1,24 @@
 import React, { useContext, useState } from 'react';
-import { View,SafeAreaView, Text, Button, TextInput, Alert, Platform, StyleSheet, Pressable } from 'react-native';
+import { View,SafeAreaView, Text, Button, TextInput, Alert, Platform, StyleSheet, Pressable, processColor } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import { AuthContext } from '@/context/AuthContext';
-import AccessibilityAndAffiliationForReport from './AccessibilityAndAffiliationForReport';
 import DatePicker from 'react-native-date-picker'
 import GlobalStyleSheet from '@/app/globalStyle';
 
-const UploadReport = () => {
-    const [reportName, setReportName] = useState(''); // State for the report name
+interface ReportType {
+    id: number,
+    patientId: number,
+    reportName: string,
+    fileExtension: string,
+    reportDate: string,
+    createdAt: string,
+    updatedAt: string,
+    deleted: boolean
+}
+
+const UploadReport = (props : {handleUploadSuccess : (report:ReportType)=>void}) => {
+    const {handleUploadSuccess} = props
+    const [reportName, setReportName] = useState('');
     const [selectedFile, setSelectedFile] = useState<any>(null);
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
     const [openModel, setOpneModel] = useState(false);
@@ -72,15 +83,9 @@ const UploadReport = () => {
             });
             
             const responseData = await response.json();
-
+            
             if (response.ok) {
-                Alert.alert('Success', 'File uploaded successfully',[{
-                    text: 'ok',
-                    onPress: () => {
-                        setOpneModel(true);
-                        setReportID(responseData.data.id);
-                    },
-                }]);
+                handleUploadSuccess(responseData.data);
                 setReportName('');
                 setSelectedFile(null);
                 setSelectedDate(new Date());
@@ -127,7 +132,6 @@ const UploadReport = () => {
             </View>
 
             <Button color="#4ba0eb" title="Upload" onPress={uploadData} />
-            <AccessibilityAndAffiliationForReport id={1} openModel={openModel} setOpenModel={setOpneModel} uploadedReportID = {reportID}/>
         </SafeAreaView>
     );
 };

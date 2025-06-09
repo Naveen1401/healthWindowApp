@@ -1,10 +1,15 @@
 PODS:
   - boost (1.84.0)
+  - BVLinearGradient (2.8.3):
+    - React-Core
   - DoubleConversion (1.1.6)
   - EXApplication (6.0.1):
     - ExpoModulesCore
   - EXConstants (17.0.4):
     - ExpoModulesCore
+  - EXImageLoader (5.1.0):
+    - ExpoModulesCore
+    - React-Core
   - Expo (52.0.26):
     - ExpoModulesCore
   - ExpoAsset (11.0.2):
@@ -15,13 +20,15 @@ PODS:
     - ExpoModulesCore
   - ExpoDocumentPicker (13.0.2):
     - ExpoModulesCore
-  - ExpoFileSystem (18.0.7):
+  - ExpoFileSystem (18.0.12):
     - ExpoModulesCore
-  - ExpoFont (13.0.3):
+  - ExpoFont (13.0.4):
     - ExpoModulesCore
   - ExpoHaptics (14.0.0):
     - ExpoModulesCore
   - ExpoHead (4.0.15):
+    - ExpoModulesCore
+  - ExpoImagePicker (16.1.4):
     - ExpoModulesCore
   - ExpoKeepAwake (14.0.2):
     - ExpoModulesCore
@@ -50,6 +57,8 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
+  - ExpoSharing (13.0.1):
+    - ExpoModulesCore
   - ExpoSplashScreen (0.29.18):
     - ExpoModulesCore
   - ExpoSymbols (0.2.0):
@@ -1869,6 +1878,49 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
+  - RNSVG (15.11.2):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.01.01.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - RNSVG/common (= 15.11.2)
+    - Yoga
+  - RNSVG/common (15.11.2):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.01.01.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
   - RNVectorIcons (10.2.0):
     - DoubleConversion
     - glog
@@ -1895,9 +1947,11 @@ PODS:
 
 DEPENDENCIES:
   - boost (from `../node_modules/react-native/third-party-podspecs/boost.podspec`)
+  - BVLinearGradient (from `../node_modules/react-native-linear-gradient`)
   - DoubleConversion (from `../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec`)
   - EXApplication (from `../node_modules/expo-application/ios`)
   - EXConstants (from `../node_modules/expo-constants/ios`)
+  - EXImageLoader (from `../node_modules/expo-image-loader/ios`)
   - Expo (from `../node_modules/expo`)
   - ExpoAsset (from `../node_modules/expo-asset/ios`)
   - ExpoBlur (from `../node_modules/expo-blur/ios`)
@@ -1907,9 +1961,11 @@ DEPENDENCIES:
   - ExpoFont (from `../node_modules/expo-font/ios`)
   - ExpoHaptics (from `../node_modules/expo-haptics/ios`)
   - ExpoHead (from `../node_modules/expo-router/ios`)
+  - ExpoImagePicker (from `../node_modules/expo-image-picker/ios`)
   - ExpoKeepAwake (from `../node_modules/expo-keep-awake/ios`)
   - ExpoLinking (from `../node_modules/expo-linking/ios`)
   - ExpoModulesCore (from `../node_modules/expo-modules-core`)
+  - ExpoSharing (from `../node_modules/expo-sharing/ios`)
   - ExpoSplashScreen (from `../node_modules/expo-splash-screen/ios`)
   - ExpoSymbols (from `../node_modules/expo-symbols/ios`)
   - ExpoSystemUI (from `../node_modules/expo-system-ui/ios`)
@@ -1984,6 +2040,7 @@ DEPENDENCIES:
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
+  - RNSVG (from `../node_modules/react-native-svg`)
   - RNVectorIcons (from `../node_modules/react-native-vector-icons`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -1994,12 +2051,16 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   boost:
     :podspec: "../node_modules/react-native/third-party-podspecs/boost.podspec"
+  BVLinearGradient:
+    :path: "../node_modules/react-native-linear-gradient"
   DoubleConversion:
     :podspec: "../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec"
   EXApplication:
     :path: "../node_modules/expo-application/ios"
   EXConstants:
     :path: "../node_modules/expo-constants/ios"
+  EXImageLoader:
+    :path: "../node_modules/expo-image-loader/ios"
   Expo:
     :path: "../node_modules/expo"
   ExpoAsset:
@@ -2018,12 +2079,16 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-haptics/ios"
   ExpoHead:
     :path: "../node_modules/expo-router/ios"
+  ExpoImagePicker:
+    :path: "../node_modules/expo-image-picker/ios"
   ExpoKeepAwake:
     :path: "../node_modules/expo-keep-awake/ios"
   ExpoLinking:
     :path: "../node_modules/expo-linking/ios"
   ExpoModulesCore:
     :path: "../node_modules/expo-modules-core"
+  ExpoSharing:
+    :path: "../node_modules/expo-sharing/ios"
   ExpoSplashScreen:
     :path: "../node_modules/expo-splash-screen/ios"
   ExpoSymbols:
@@ -2169,6 +2234,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-reanimated"
   RNScreens:
     :path: "../node_modules/react-native-screens"
+  RNSVG:
+    :path: "../node_modules/react-native-svg"
   RNVectorIcons:
     :path: "../node_modules/react-native-vector-icons"
   Yoga:
@@ -2176,21 +2243,25 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   boost: 1dca942403ed9342f98334bf4c3621f011aa7946
+  BVLinearGradient: cb006ba232a1f3e4f341bb62c42d1098c284da70
   DoubleConversion: f16ae600a246532c4020132d54af21d0ddb2a385
   EXApplication: 88ebf1a95f85faa5d2df160016d61f2d060e9438
   EXConstants: 6b8c5653492349b3c3fe6b905c556bc45b360405
+  EXImageLoader: 4d3d3284141f1a45006cc4d0844061c182daf7ee
   Expo: c6bc913a8e28f698c948b27b80570208af58adfa
   ExpoAsset: d2d2cbc6a4efadf51a3da27d85d589935abd0b98
   ExpoBlur: 2b92367da8158eeaee9bfa940d82512a09c8e0c6
   ExpoCrypto: 483fc758365923f89ddaab4327c21cae9534841d
   ExpoDocumentPicker: 1b799812735778618aa7f92b848ff66c5d23ef58
-  ExpoFileSystem: 818e82dbb71175414d1ca310e926c48ff0d07348
-  ExpoFont: 38656978c2a4022fb7e0c43e4968d66340f5e2f3
+  ExpoFileSystem: 42d363d3b96f9afab980dcef60d5657a4443c655
+  ExpoFont: f354e926f8feae5e831ec8087f36652b44a0b188
   ExpoHaptics: f8eacde90398b8be3648ed823b6e9e6bf87ece3f
   ExpoHead: 09fa14b978c938d40bf6b516460da411ae54a7c2
+  ExpoImagePicker: 0963da31800c906e01c03e25d7c849f16ebf02a2
   ExpoKeepAwake: 62ff49bbc3bff90d8ee28329190f9ba371bf88e7
   ExpoLinking: 40e30b571ffb77b280a38bed137d89b21f46f2a0
   ExpoModulesCore: 646f706f6e756128c79d4c10972cade56d9efef0
+  ExpoSharing: 849a5ce9985c22598c16ec027e32969be8062e8e
   ExpoSplashScreen: 5397c2419fb3ca0788de37ea2547deac376aad83
   ExpoSymbols: ed2f35e4a0290ff242eb295bd47adff2e46f5bfc
   ExpoSystemUI: 778d700c6f38d3d7b8794460f50c1ca05c4f7462
@@ -2263,6 +2334,7 @@ SPEC CHECKSUMS:
   RNGestureHandler: 16ef3dc2d7ecb09f240f25df5255953c4098819b
   RNReanimated: a2692304a6568bc656c04c8ffea812887d37436e
   RNScreens: 351f431ef2a042a1887d4d90e1c1024b8ae9d123
+  RNSVG: bbbdd17e8730c0f2a9cb416e5f37be87e29ebc90
   RNVectorIcons: a24016b773380b1aa37fca501ec6b94a951890a0
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   Yoga: fcc198acd4a55599b3468cfb6ebc526baff5f06e
