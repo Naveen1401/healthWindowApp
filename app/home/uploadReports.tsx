@@ -164,7 +164,7 @@ const UploadReports = () => {
                     handleView={handleViewReport} />
                 ))}
               </View>
-              {reportData.length > 5 ? <Button
+              {reportData.length > 6 ? <Button
                 title="load more ..."
                 onPress={() => {
                   router.push('/home/myReports')
