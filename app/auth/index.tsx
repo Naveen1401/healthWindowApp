@@ -1,8 +1,7 @@
 import React from "react";
-import { Text, View, SafeAreaView, TouchableOpacity, StyleSheet } from 'react-native'
+import { Text, View, SafeAreaView, TouchableOpacity, StyleSheet, Alert } from 'react-native'
 import { useContext, useEffect } from "react";
 import { AuthContext } from "../../context/AuthContext";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Google from 'expo-auth-session/providers/google'
 import * as WebBrowser from 'expo-web-browser'
 import { GoogleSVG, HomeSVG } from "@/assets/svgComponents/generalSVGs";
@@ -23,7 +22,7 @@ export default function AuthScreen() {
         webClientId: process.env.EXPO_PUBLIC_WEB_CLIENT_ID
     };
 
-    const { setToken, setUserID, setImageURL, setName } = useContext(AuthContext);
+    const { setAuthData } = useContext(AuthContext);
 
     const [request, response, promptAsync] = Google.useAuthRequest(config);
 
@@ -37,19 +36,20 @@ export default function AuthScreen() {
             });
             const apiresponse = await response.json();
 
-            console.log("Login Info", apiresponse, user);
-
-            const loginUserID: string = await apiresponse?.data?.id.toString();
-
-            await AsyncStorage.setItem("userID", loginUserID);
-            await AsyncStorage.setItem("name", user.given_name);
-            await AsyncStorage.setItem("imageURL", user.picture);
-            console.log("UserID ---->> ", loginUserID);
-
-            setUserID(loginUserID);
-            setName(user.given_name);
-            setImageURL(user.picture);
-
+            if(apiresponse.status === 200){
+                setAuthData(
+                    { 
+                        id: apiresponse?.data?.createdPatient?.id.toString(),
+                        name: user.given_name+" "+user.family_name,
+                        email: user.email,
+                        imageURL: user.picture
+                    },
+                    apiresponse?.data?.accessToken,
+                    apiresponse?.data?.refreshToken
+                )
+            }else{
+                Alert.alert("Error",apiresponse.error);
+            }
         } catch (error) {
             console.log(error);
         }
@@ -57,7 +57,6 @@ export default function AuthScreen() {
 
     const getUserProfile = async (token: any) => {
         if (!token) return;
-        await AsyncStorage.setItem("token", token);
         try {
             const response = await fetch('https://www.googleapis.com/userinfo/v2/me', {
                 headers: {
@@ -66,7 +65,6 @@ export default function AuthScreen() {
             });
             const user = await response.json();
             handleUserSign(user);
-
         } catch (error) {
             console.log(error);
         }
@@ -76,7 +74,6 @@ export default function AuthScreen() {
         if (response?.type === 'success') {
             const { authentication } = response;
             const token = authentication?.accessToken;
-            setToken(token ? token : null);
             getUserProfile(token);
         }
     }

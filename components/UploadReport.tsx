@@ -4,6 +4,7 @@ import * as DocumentPicker from 'expo-document-picker';
 import { AuthContext } from '@/context/AuthContext';
 import DatePicker from 'react-native-date-picker'
 import GlobalStyleSheet from '@/app/globalStyle';
+import useApi from '@/CustomHooks/useCallAPI';
 
 interface ReportType {
     id: number,
@@ -21,11 +22,12 @@ const UploadReport = (props : {handleUploadSuccess : (report:ReportType)=>void})
     const [reportName, setReportName] = useState('');
     const [selectedFile, setSelectedFile] = useState<any>(null);
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-    const [openModel, setOpneModel] = useState(false);
-    const [reportID, setReportID] = useState<any>(null);
-    const [open, setOpen] = useState(false)
+    // const [openModel, setOpneModel] = useState(false);
+    // const [reportID, setReportID] = useState<any>(null);
+    const [open, setOpen] = useState(false);
+    const {callApi} = useApi();
 
-    const {userID} = useContext(AuthContext);
+    const {user} = useContext(AuthContext);
 
     const pickDocument = async () => {
         try {
@@ -74,46 +76,49 @@ const UploadReport = (props : {handleUploadSuccess : (report:ReportType)=>void})
         payloadForm.append('uploadReportRequestDto', JSON.stringify(uploadReportRequestDto));
 
         try {
-            const response = await fetch(process.env.EXPO_PUBLIC_BACKEND_SERVER +'/patient/uploadReport', {
+            const responseData = await callApi({
+                url: process.env.EXPO_PUBLIC_BACKEND_SERVER + '/patient/uploadReport',
                 method: 'POST',
                 headers: {
-                    'Patient-Id': userID?userID:""
+                    'Patient-Id': user?.id ?? "-1"
                 },
                 body: payloadForm,
-            });
+            })
             
-            const responseData = await response.json();
-            
-            if (response.ok) {
+            if (responseData.status===201) {
+                console.log("REsponfe data : ", responseData);
+                
                 handleUploadSuccess(responseData.data);
                 setReportName('');
                 setSelectedFile(null);
                 setSelectedDate(new Date());
-            } else {
-                const errorResponse = await response.json();
-                Alert.alert('Error', `Upload failed: ${errorResponse.message || 'Unknown error'}`);
+            }
+            if (responseData.status===401){
+                Alert.alert('Error', `Upload failed: ${responseData.error || 'Unknown error'}`);
             }
         } catch (error) {
             Alert.alert('Error', 'Something went wrong while uploading the file');
+            console.log(error);
         }
     };
 
     return (
         <SafeAreaView style = {style.uploadReportMainContainer}>
-            <Text style = {GlobalStyleSheet.subHeading}>Upload Report</Text>
-            <Pressable style={style.uploadWidgetContainer} onPress={pickDocument}>
-                {!selectedFile?<Text>^ Select Report</Text>:
-                <View style={style.selectedFileView}>
-                    <Text>{selectedFile.name}</Text>
-                    <Button title="x" onPress={()=>(setSelectedFile(null))}/>
-                </View>}
-            </Pressable>
-            <TextInput
-                value={reportName}
-                onChangeText={setReportName}
-                placeholder="Enter report name"
-                style={style.reportNameInput}
-            />
+            <View>
+                <Pressable style={style.uploadWidgetContainer} onPress={pickDocument}>
+                    {!selectedFile?<Text>^ Select Report</Text>:
+                    <View style={style.selectedFileView}>
+                        <Text>{selectedFile.name}</Text>
+                        <Button title="x" onPress={()=>(setSelectedFile(null))}/>
+                    </View>}
+                </Pressable>
+                <TextInput
+                    value={reportName}
+                    onChangeText={setReportName}
+                    placeholder="Enter report name"
+                    style={style.reportNameInput}
+                />
+            </View>
             <View >
                 <Button title={`Report Date: ${selectedDate.toLocaleDateString()}`} onPress={() => setOpen(true)} />
                 <DatePicker
@@ -131,7 +136,9 @@ const UploadReport = (props : {handleUploadSuccess : (report:ReportType)=>void})
                 />
             </View>
 
-            <Button color="#4ba0eb" title="Upload" onPress={uploadData} />
+            <View style={style.uploadBtn}>
+                <Button color="white" title="Upload" onPress={uploadData} />
+            </View>
         </SafeAreaView>
     );
 };
@@ -145,6 +152,7 @@ const style = StyleSheet.create({
     uploadWidgetContainer:{
         paddingVertical: 30,
         marginHorizontal: 20,
+        marginTop: 20,
         borderRadius:10,
         borderWidth:2,
         borderColor:"gray",
@@ -166,6 +174,12 @@ const style = StyleSheet.create({
         flexDirection: "row",
         alignItems:"center"
     },
+    uploadBtn:{
+        backgroundColor: '#007bff',
+        marginBottom: 10,
+        marginHorizontal: 10,
+        borderRadius: 10,
+    }
 });
 
 export default UploadReport;

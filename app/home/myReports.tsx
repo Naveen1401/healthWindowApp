@@ -27,7 +27,7 @@ const MyReports = () => {
     const [filteredReports, setFilteredReports] = useState<ReportType[] | null>(reportData);
     const [selectedReportID, setSelectedReportID] = useState<number>(-1);
     const { callApi } = useApi();
-    const {userID} = useContext(AuthContext);
+    const {user} = useContext(AuthContext);
     
 
     const handleEdit = (report: ReportType) => {
@@ -52,7 +52,7 @@ const MyReports = () => {
                     url: `${process.env.EXPO_PUBLIC_BACKEND_SERVER}/patient/deleteReport?reportId=${report.id}`,
                     method: "DELETE",
                     headers: {
-                        "Patient-Id": userID ?? "-1"
+                        "Patient-Id": user?.id ?? "-1"
                     },
                     });
 
@@ -69,13 +69,13 @@ const MyReports = () => {
     };
 
     const handleViewReport = async (report: ReportType) => {
-        const urlString = `${process.env.EXPO_PUBLIC_BACKEND_SERVER}/patient/s3UrlGenerator?key=reports/${userID}/${report.reportDate}/${report.reportName}.pdf`;
+        const urlString = `${process.env.EXPO_PUBLIC_BACKEND_SERVER}/patient/s3UrlGenerator?key=reports/${user?.id}/${report.reportDate}/${report.reportName}.pdf`;
 
         const request = await callApi({
             url: urlString,
             method: "GET",
             headers: {
-            "Patient-Id": userID ?? "-1"
+            "Patient-Id": user?.id ?? "-1"
             },
         })
 
@@ -106,7 +106,7 @@ const MyReports = () => {
         <SafeAreaView style={style.myReportsMainContainer}>
             <Text style={GlobalStyleSheet.mainHeading}>My Reports</Text>
             <TextInput
-                placeholder='Search medications...'
+                placeholder='Search report name...'
                 style={{ padding: 10, borderWidth: 1, borderColor: '#ccc', borderRadius: 5, marginVertical: 10, marginHorizontal: 20, backgroundColor: "white" }}
                 onChangeText= {(text)=>{handleSearch(text)}}
             />

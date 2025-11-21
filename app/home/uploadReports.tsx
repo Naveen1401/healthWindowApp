@@ -29,8 +29,8 @@ interface DoctorDetails {
 interface Doctor {
   id: number;
   userId: number;
-  firstName: string;
-  lastName: string;
+  first_name: string;
+  last_name: string;
   affiliatedPatientIds: number[] | null;
   doctorDetails: DoctorDetails;
   requestedAffiliationPatientIds: number[] | null;
@@ -39,35 +39,46 @@ interface Doctor {
 }
 
 const UploadReports = () => {
-  const { callApi, loading } = useApi();
+  const { callApi: callReportsApi, loading: loadingReports, error: reportsError } = useApi();
+  const { callApi} = useApi();
+
 
   const { reportData, setReportData } = useContext(ReportDataContext);
   const { doctorData, setDoctorData } = useContext(DoctorDataContext);
   const [openModel, setOpenModel] = useState<boolean>(false);
   const [selectedReportID, setSelectedReportID] = useState<number>(-1);
 
-  const { userID } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
 
   const fetchReports = async () => {
-    const request = await callApi({
-      url: `${process.env.EXPO_PUBLIC_BACKEND_SERVER}/patient/myReports`,
-      method: "GET",
-      headers: {
-        "Patient-Id": userID ?? "-1"
-      }
-    })
-    setReportData(request.data);
+    try{
+      const request = await callReportsApi({
+        url: `${process.env.EXPO_PUBLIC_BACKEND_SERVER}/patient/myReports`,
+        method: "GET",
+        headers: {
+          "Patient-Id": user?.id ?? "-1"
+        }
+      })
+      console.log(request);
+      setReportData(request.data);
+    }catch(err){
+      console.log(err);
+    }
   }
 
   const fetchDoctors = async () => {
-    const request = await callApi({
-      url: `${process.env.EXPO_PUBLIC_BACKEND_SERVER}/patient/myDoctors`,
-      method: "GET",
-      headers: {
-        "Patient-Id": userID ?? "-1"
-      }
-    })
-    setDoctorData(request.data);
+    try {
+      const request = await callApi({
+        url: `${process.env.EXPO_PUBLIC_BACKEND_SERVER}/patient/myDoctors`,
+        method: "GET",
+        headers: {
+          "Patient-Id": user?.id ?? "-1"
+        }
+      })
+      setDoctorData(request.data);
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   useEffect(() => {
@@ -98,12 +109,10 @@ const UploadReports = () => {
                 url: `${process.env.EXPO_PUBLIC_BACKEND_SERVER}/patient/deleteReport?reportId=${report.id}`,
                 method: "DELETE",
                 headers: {
-                  "Patient-Id": userID ?? "-1"
+                  "Patient-Id": user?.id ?? "-1"
                 },
               });
-
               setReportData(prev => prev?.filter(r => r.id !== report.id) ?? null);
-
               console.log("Delete successful:", request);
             } catch (error) {
               console.error("Delete failed:", error);
@@ -116,22 +125,26 @@ const UploadReports = () => {
   };
 
   const handleViewReport = async (report: ReportType) => {
-        const urlString = `${process.env.EXPO_PUBLIC_BACKEND_SERVER}/patient/s3UrlGenerator?key=reports/${userID}/${report.reportDate}/${report.reportName}.pdf`;
-
+    const urlString = `${process.env.EXPO_PUBLIC_BACKEND_SERVER}/common/s3UrlGenerator?key=reports/${user?.id}/${report.reportDate}/${report.reportName}.pdf`;
+      try{
         const request = await callApi({
           url: urlString,
           method: "GET",
           headers: {
-            "Patient-Id": userID ?? "-1"
+            "Patient-Id": user?.id ?? "-1"
           },
         })
-
+        
         const presignedUrl = request.data;
 
         router.push({
           pathname: '/home/pdfViewer',
           params: { url: encodeURIComponent(presignedUrl) },
         });
+      }
+      catch(err){
+        console.log(err);
+      }
   }
 
   const handleUploadSuccess = (report: ReportType) => {
@@ -150,7 +163,7 @@ const UploadReports = () => {
     <SafeAreaView style={style.uploadRportsMainContainer}>
       <Text style={GlobalStyleSheet.mainHeading}>Upload Reports</Text>
       <View style={{ height: '40%' }}><UploadReport handleUploadSuccess={handleUploadSuccess} /></View>
-      {loading ? (
+      {loadingReports ? (
         <ActivityIndicator />
       ) : (
         reportData && reportData.length > 0 ? <View style={{ height: '100%'}}>

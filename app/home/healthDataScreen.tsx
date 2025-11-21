@@ -9,7 +9,7 @@ import {
     ActivityIndicator,
 } from "react-native";
 import GlobalStyleSheet from "../globalStyle";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import useApi from "@/CustomHooks/useCallAPI";
 import { useLocalSearchParams } from "expo-router";
 import HealthDataList from "@/components/HealthData/HealthDataList";
@@ -21,12 +21,14 @@ import BloodPressureChart from "@/components/HealthData/Charts/BloodPressureChar
 import GlucoseChart from "@/components/HealthData/Charts/GlucoseChart";
 import WeightChart from "@/components/HealthData/Charts/WeightChart";
 import InsulineChart from "@/components/HealthData/Charts/InsulineChart";
+import { AuthContext } from "@/context/AuthContext";
 
 const HealthDataScreen = () => {
     const { healthType, title } = useLocalSearchParams();
     const [visible, setVisible] = useState<boolean>(false);
     const [healthData, setHealthData] = useState<any[]>([]);
     const { callApi, loading } = useApi();
+    const {user} = useContext(AuthContext);
 
     const MODAL_COMPONENTS: Record<string, React.FC<any>> = {
         INSULIN: AddInsuline,
@@ -56,7 +58,7 @@ const HealthDataScreen = () => {
                 process.env.EXPO_PUBLIC_BACKEND_SERVER +
                 "/patient/getHealthData?type=" +
                 healthType,
-            headers: { "Patient-Id": "1" },
+            headers: { "Patient-Id": user?.id??"-1" },
         });
 
         setHealthData(response.data);
@@ -67,11 +69,14 @@ const HealthDataScreen = () => {
             const response = await callApi({
                 method: "POST",
                 url: process.env.EXPO_PUBLIC_BACKEND_SERVER + "/patient/deleteHealthData",
-                headers: { "Patient-Id": "1" },
-                body: {
+                headers: { 
+                    "Content-Type": "application/json",
+                    "Patient-Id": user?.id ?? "-1" 
+                },
+                body: JSON.stringify({
                     type: healthType,
                     id: id
-                }
+                })
             });
 
             Alert.alert("Success", "Record deleted successfully!");
@@ -98,8 +103,11 @@ const HealthDataScreen = () => {
             const response = await callApi({
                 url: process.env.EXPO_PUBLIC_BACKEND_SERVER + "/patient/addHealthData",
                 method: "POST",
-                body: payload,
-                headers: { "Patient-Id": "1" },
+                headers: { 
+                    "Content-Type": "application/json",
+                    "Patient-Id": user?.id ?? "-1" 
+                },
+                body: JSON.stringify(payload),
             });
 
             console.log("API response:", response);

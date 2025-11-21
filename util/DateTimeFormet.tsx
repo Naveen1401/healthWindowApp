@@ -28,3 +28,21 @@ export const FormatTimeDisplay = (timeString: string) => {
         return timeString;
     }
 };
+
+
+export const formatConsultationDate = (isoString: string) => {
+    const date = new Date(isoString);
+
+    const day = date.toLocaleDateString("en-IN", { weekday: "long" }); // Tuesday
+    const fullDate = date.toLocaleDateString("en-IN", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+    }); // 10 January 2025
+    const time = date.toLocaleTimeString("en-IN", {
+        hour: "2-digit",
+        minute: "2-digit",
+    }); // 01:45 PM
+
+    return { day, fullDate, time };
+};

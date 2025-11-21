@@ -4,7 +4,8 @@ import {
     View, 
     StyleSheet, 
     FlatList, 
-    Button
+    Button,
+    Alert
 } from 'react-native';
 import React, { useContext, useState } from 'react';
 import SelectionBox from './SelectionBox';
@@ -21,15 +22,15 @@ type AccessibilityAndAffiliationForReportProps = {
 
 type Doctor = {
     id: number;
-    firstName: string;
-    lastName: string;
+    first_name: string;
+    last_name: string;
 };
 
 const AccessibilityAndAffiliationForReport: React.FC<AccessibilityAndAffiliationForReportProps> = ({ doctors, openModel, setOpenModel, reportID }) => {
     const [selectedDoctors, setSelectedDoctors] = useState<number[]>([]);
     const {callApi} = useApi();
     const [isLoading, setIsLoading] = useState(false);
-    const {userID} = useContext(AuthContext);
+    const {user} = useContext(AuthContext);
 
     const toggleSelection = (id: number) => {
         if(id===-1){
@@ -44,6 +45,7 @@ const AccessibilityAndAffiliationForReport: React.FC<AccessibilityAndAffiliation
     };
 
     if (doctors.length===0) {
+        // Alert.alert("Info.", "You don't any doctors affiliated with you to grant access for th reports.")
         return;
     };
 
@@ -54,13 +56,14 @@ const AccessibilityAndAffiliationForReport: React.FC<AccessibilityAndAffiliation
                 url: `${process.env.EXPO_PUBLIC_BACKEND_SERVER}/patient/accessibilityAndAffiliationForReport`,
                 method: "POST",
                 headers: {
-                    "Patient-Id": userID ?? "-1"
+                    "Content-Type": "application/json",
+                    "Patient-Id": user?.id ?? "-1"
                 },
-                body: {
+                body: JSON.stringify({
                     report_id: reportID,
                     all_doctors: false,
                     specific_accessibility_doctor_ids: selectedDoctors
-                }
+                })
             });
 
             console.log("API Response:", response);
@@ -95,7 +98,7 @@ const AccessibilityAndAffiliationForReport: React.FC<AccessibilityAndAffiliation
                         keyExtractor={(item) => item.id.toString()}
                         renderItem={({ item }) => (
                             <SelectionBox 
-                                listText={`${item.firstName} ${item.lastName}`} 
+                                listText={`${item.first_name} ${item.last_name}`} 
                                 status={selectedDoctors.includes(item.id)} 
                                 pressHandler={() => toggleSelection(item.id)}
                             />
@@ -103,17 +106,17 @@ const AccessibilityAndAffiliationForReport: React.FC<AccessibilityAndAffiliation
                     />
                     <View style={styles.activityContainer}>
                         <Button
-                            title={isLoading ? 'Saving...' : 'Save'}
-                            onPress={handleAffiliacation}
-                            disabled={isLoading}
-                        />
-                        <Button
                             color="red"
                             title='Close'
                             onPress={() => {
                                 setOpenModel(false);
                                 setSelectedDoctors([]);
                             }}
+                            disabled={isLoading}
+                        />
+                        <Button
+                            title={isLoading ? 'Saving...' : 'Save'}
+                            onPress={handleAffiliacation}
                             disabled={isLoading}
                         />
                     </View>

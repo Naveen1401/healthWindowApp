@@ -1,5 +1,3 @@
-// ProfileScreen.tsx
-
 import React, { useState, useLayoutEffect, useContext } from "react";
 import {
   View,
@@ -15,54 +13,70 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { AuthContext } from "@/context/AuthContext";
-
-// If you’re using React Navigation, you can place this screen in a stack and
-// the headerRight will be handled via navigation.setOptions. Otherwise,
-// we simply render a header row ourselves.
+import useApi from "@/CustomHooks/useCallAPI";
 
 export default function Profile({ navigation }: any) {
-  // Initial "hard‐coded" values:
-  const [firstName, setFirstName] = useState("Naveen");
-  const [lastName, setLastName] = useState("Mahanwal");
-  const [email] = useState("naveen011214@gmail.com"); // readonly
+  const { user, logout } = useContext(AuthContext);
 
-    const { logout } = useContext(AuthContext);
-  const [profileImage, setProfileImage] = useState(
-    "https://lh3.googleusercontent.com/a/ACg8ocKyG6kdnwvpXvceblZRgY8nivtAJWG1UJnXhNyFB2DK5hsbozkTaw=s96-c"
-  );
+  const name = user?.name?.split(" ") || ["", ""];
+  const [firstName, setFirstName] = useState(name[0]);
+  const [lastName, setLastName] = useState(name[1]);
+  const email = user?.email || "";
+
+  const [phoneNumber, setPhoneNumber] = useState("");
+
+  const { callApi, loading } = useApi();
+  const [profileImage, setProfileImage] = useState(user?.imageURL || "");
 
   const [isEditing, setIsEditing] = useState(false);
-  const [loading, setLoading] = useState(false);
 
-  // If using React Navigation: set header button via navigation options
+  // 🔹 Top Navigation Buttons: Cancel on Left, Save/Edit on Right
   useLayoutEffect(() => {
-    if (navigation) {
-      navigation.setOptions({
-        headerRight: () => (
+    if (!navigation) return;
+
+    navigation.setOptions({
+      headerLeft: () =>
+        isEditing ? (
           <TouchableOpacity
             onPress={() => {
-              if (isEditing) {
-                saveProfile();
-              } else {
-                setIsEditing(true);
-              }
+              setIsEditing(false);
+              resetForm(); // reset to original data
             }}
             style={styles.headerButton}
           >
-            <Text style={styles.headerButtonText}>
-              {isEditing ? "Save" : "Edit"}
-            </Text>
+            <Text style={[styles.headerButtonText, { color: "red" }]}>Cancel</Text>
           </TouchableOpacity>
-        ),
-      });
-    }
-  }, [navigation, isEditing, firstName, lastName, profileImage]);
+        ) : null,
 
-  // If NOT using React Navigation, you can comment out the above useLayoutEffect
-  // and uncomment the header row in the render below.
+      headerTitle: "Profile", // centered automatically
+      headerTitleAlign: "center",
+
+      headerRight: () => (
+        <TouchableOpacity
+          onPress={() => {
+            if (isEditing) saveProfile();
+            else setIsEditing(true);
+          }}
+          style={styles.headerButton}
+        >
+          <Text style={styles.headerButtonText}>
+            {isEditing ? "Save" : "Edit"}
+          </Text>
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation, isEditing, firstName, lastName, profileImage, phoneNumber]);
+
+  const resetForm = () => {
+    setFirstName(name[0]);
+    setLastName(name[1]);
+    setProfileImage(user?.imageURL || "");
+    setPhoneNumber(""); // reset phone
+  };
 
   const pickImageFromGallery = async () => {
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    const permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permissionResult.granted) {
       Alert.alert("Permission required", "Permission to access gallery is needed!");
       return;
@@ -75,77 +89,73 @@ export default function Profile({ navigation }: any) {
       allowsEditing: true,
     });
 
-    // ✅ FIX: check if it was canceled (correct spelling) and narrow the type
-    if (!result.canceled && result.assets && result.assets.length > 0) {
-      const selectedAsset = result.assets[0];
-      setProfileImage(selectedAsset.uri);
+    if (!result.canceled && result.assets?.length > 0) {
+      setProfileImage(result.assets[0].uri);
     }
   };
-  
 
   const saveProfile = async () => {
-    setLoading(true);
     try {
-      // Placeholder API endpoint—replace with your real URL
-      const API_URL = "https://your-api.com/updateProfile";
-
       const body = {
         firstName,
         lastName,
-        profileImage,
-        // email is not sent/edited (read-only); if you need to send it, include here
+        phone: phoneNumber || null,
       };
 
-      const response = await fetch(API_URL, {
+      await callApi({
+        url:
+          process.env.EXPO_PUBLIC_BACKEND_SERVER +
+          "/patient/updatePatientDetails",
         method: "POST",
-        headers: {
+        headers: { 
           "Content-Type": "application/json",
+          "patient-Id": user?.id??"-1"
         },
         body: JSON.stringify(body),
       });
-
-      if (!response.ok) {
-        throw new Error(`Server responded with ${response.status}`);
-      }
-
-      // You can inspect the JSON if the API sends back updated user object:
-      // const json = await response.json();
 
       Alert.alert("Success", "Profile updated successfully!");
       setIsEditing(false);
     } catch (err) {
       console.error(err);
       Alert.alert("Error", "Failed to update profile. Try again.");
-    } finally {
-      setLoading(false);
     }
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.headerContainer}>
-        <Text style={styles.headerTitle}>Profile</Text>
-        <TouchableOpacity
-          onPress={() => {
-            if (isEditing) {
-              saveProfile();
-            } else {
-              setIsEditing(true);
-            }
-          }}
-          style={styles.headerButton}
-        >
-          <Text style={styles.headerButtonText}>
-            {isEditing ? "Save" : "Edit"}
-          </Text>
-        </TouchableOpacity>
-      </View>
+      {/* Centered Profile Title for fallback layout (non-navigation mode) */}
+      {!navigation && (
+        <View style={styles.headerContainer}>
+          {isEditing && (
+            <TouchableOpacity
+              onPress={() => {
+                setIsEditing(false);
+                resetForm();
+              }}
+            >
+              <Text style={[styles.headerButtonText, { color: "red" }]}>Cancel</Text>
+            </TouchableOpacity>
+          )}
+
+          <Text style={styles.headerTitle}>Profile</Text>
+
+          <TouchableOpacity
+            onPress={() => {
+              if (isEditing) saveProfile();
+              else setIsEditing(true);
+            }}
+          >
+            <Text style={styles.headerButtonText}>
+              {isEditing ? "Save" : "Edit"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
       <TouchableOpacity
         onPress={() => {
-          if (isEditing) {
-            pickImageFromGallery();
-          }
+          if (isEditing) pickImageFromGallery();
         }}
         activeOpacity={isEditing ? 0.7 : 1}
         style={styles.imageWrapper}
@@ -158,6 +168,7 @@ export default function Profile({ navigation }: any) {
         )}
       </TouchableOpacity>
 
+      {/* First Name */}
       <View style={styles.fieldContainer}>
         <Text style={styles.label}>First Name</Text>
         {isEditing ? (
@@ -171,6 +182,7 @@ export default function Profile({ navigation }: any) {
         )}
       </View>
 
+      {/* Last Name */}
       <View style={styles.fieldContainer}>
         <Text style={styles.label}>Last Name</Text>
         {isEditing ? (
@@ -184,6 +196,23 @@ export default function Profile({ navigation }: any) {
         )}
       </View>
 
+      {/* Phone Number */}
+      <View style={styles.fieldContainer}>
+        <Text style={styles.label}>Phone Number</Text>
+        {isEditing ? (
+          <TextInput
+            value={phoneNumber}
+            onChangeText={setPhoneNumber}
+            keyboardType="phone-pad"
+            placeholder="Enter phone number"
+            style={styles.input}
+          />
+        ) : (
+          <Text style={styles.value}>{phoneNumber || "Not provided"}</Text>
+        )}
+      </View>
+
+      {/* Email (not editable) */}
       <View style={styles.fieldContainer}>
         <Text style={styles.label}>Email</Text>
         <Text style={[styles.value, { color: "#555" }]}>{email}</Text>
@@ -192,22 +221,15 @@ export default function Profile({ navigation }: any) {
       <Button title="Log Out" color={"red"} onPress={logout} />
 
       {loading && (
-        <ActivityIndicator
-          size="large"
-          color="#0000ff"
-          style={{ marginTop: 24 }}
-        />
+        <ActivityIndicator size="large" color="#0000ff" style={{ marginTop: 24 }} />
       )}
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: "#F9FAFB",
-  },
+  container: { flex: 1, padding: 20, backgroundColor: "#F9FAFB" },
+
   headerContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -217,11 +239,12 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 24,
     fontWeight: "bold",
+    textAlign: "center",
+    flex: 1,
   },
   headerButton: {
     paddingHorizontal: 12,
     paddingVertical: 6,
-
     borderRadius: 4,
   },
   headerButtonText: {
@@ -229,6 +252,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "500",
   },
+
   imageWrapper: {
     alignSelf: "center",
     marginBottom: 24,
@@ -249,22 +273,11 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 4,
   },
-  cameraText: {
-    color: "#FFF",
-    fontSize: 12,
-  },
-  fieldContainer: {
-    marginBottom: 18,
-  },
-  label: {
-    fontSize: 14,
-    color: "#374151",
-    marginBottom: 4,
-  },
-  value: {
-    fontSize: 16,
-    color: "#111827",
-  },
+  cameraText: { color: "#FFF", fontSize: 12 },
+
+  fieldContainer: { marginBottom: 18 },
+  label: { fontSize: 14, color: "#374151", marginBottom: 4 },
+  value: { fontSize: 16, color: "#111827" },
   input: {
     borderWidth: 1,
     borderColor: "#D1D5DB",

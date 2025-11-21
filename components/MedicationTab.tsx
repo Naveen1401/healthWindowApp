@@ -1,6 +1,9 @@
 import { View, Text, StyleSheet } from "react-native";
 import { Checkbox } from "react-native-paper";
 import { FormatTimeDisplay } from "@/util/DateTimeFormet";
+import useApi from "@/CustomHooks/useCallAPI";
+import { useContext } from "react";
+import { AuthContext } from "@/context/AuthContext";
 
 type MedicationTabProps = {
     selectedDate: string;
@@ -31,6 +34,9 @@ const MedicationTab: React.FC<MedicationTabProps> = ({
         return `${hours}:${minutes}:${seconds}`;
     };
 
+    const {callApi} = useApi(); 
+    const {user} = useContext(AuthContext);
+
     const intake_time = getLocalTime();
 
     const getLocalDate = () => {
@@ -55,17 +61,16 @@ const MedicationTab: React.FC<MedicationTabProps> = ({
             "medication_taken": newStatus
         };
 
-        console.log("Body Data :::::::> ", bodyData);
-        const response = await fetch(process.env.EXPO_PUBLIC_BACKEND_SERVER + '/patient/upsertMedicationIntakeRecord', {
+        const response = await callApi({
+            url: process.env.EXPO_PUBLIC_BACKEND_SERVER + '/patient/upsertMedicationIntakeRecord',
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "Patient-Id": '1',
+                "Patient-Id": user?.id ?? "-1",
             },
             body: JSON.stringify(bodyData),
         });
-        const json = await response.json();
-        console.log(json);  
+        console.log(response);  
     }
 
     return (

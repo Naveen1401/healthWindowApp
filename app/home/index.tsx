@@ -1,21 +1,24 @@
 import React, {useContext} from "react";
-import { SafeAreaView, View, Text, Button, StyleSheet, Image, TouchableOpacity, ImageSourcePropType } from "react-native";
+import { SafeAreaView, View, Text, Button, StyleSheet, Image, TouchableOpacity, ImageSourcePropType, Pressable } from "react-native";
 import { useRouter } from "expo-router";
 import { ReportSVG, MedicationSVGs, HealthDataSVG, MedicationTrackerSVG } from "@/assets/svgComponents/generalSVGs";
 import { AuthContext } from "@/context/AuthContext";
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { name, imageURL} = useContext(AuthContext);
+  const {user} = useContext(AuthContext);
 
   return (
     <SafeAreaView>
       <View style={styles.welcomeContainer}>
-        <Text style={styles.mainHeading}>{name}! 👋🏽 </Text>
+        <Pressable style={styles.addDocter}>
+          <Button title="Add +" onPress={() => router.push('/home/docterAffiliation')} />
+        </Pressable>
+        <Text style={styles.mainHeading}>{user?.name}! 👋🏽 </Text>
         <TouchableOpacity style={styles.profileIcon} onPress={() => router.push('/home/profile')}>
           <Image 
-            source={imageURL
-                  ? { uri: imageURL }
+            source={user?.imageURL
+                  ? { uri: user?.imageURL }
                   : require('@/assets/images/profileIcon.png') // fallback to local image
             }
             style={styles.image}
@@ -27,11 +30,11 @@ export default function HomeScreen() {
         <ReportSVG transform={'rotate(350)'} height={80} width={80} />
         <Text style={{color:"white", fontSize: 20, fontWeight: "600", marginLeft:15}}>Report</Text>
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => router.push('/home/medication')} style={styles.medicationTrakerTab}>
+      <TouchableOpacity onPress={() => router.push('/home/myconsultation')} style={styles.medicationTrakerTab}>
         <MedicationTrackerSVG transform={'rotate(350)'} height={80} width={80} />
-        <Text style={{ color: "white", fontSize: 20, fontWeight: "600", marginLeft: 15 }}>Medication </Text>
+        <Text style={{ color: "white", fontSize: 20, fontWeight: "600", marginLeft: 15 }}>My Consultations </Text>
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => router.push('/home/myMedication')} style={styles.medicationTab}>
+      <TouchableOpacity onPress={() => router.push('/home/medication')} style={styles.medicationTab}>
         <MedicationSVGs transform={'rotate(350)'} height={80} width={80} />
         <Text style={{ color: "white", fontSize: 20, fontWeight: "600", marginLeft: 15 }}>Medication </Text>
       </TouchableOpacity>
@@ -64,6 +67,10 @@ const styles = StyleSheet.create({
   profileIcon:{
     position:"absolute",
     right: 20
+  },
+  addDocter:{
+    position: "absolute",
+    left: 20
   },
   mainHeading: {
     fontSize: 20,

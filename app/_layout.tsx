@@ -20,18 +20,16 @@ const queryClient = new QueryClient({
 });
 
 function Layout() {
-  const { userID, token, name, imageURL} = useContext(AuthContext);
+  const { isLoggedIn} = useContext(AuthContext);
   const router = useRouter();
 
   useEffect(() => {
-    if (userID) {
+    if (isLoggedIn) {
       router.replace('/home');  // Navigate to the home route when authenticated
     } else {
       router.replace('/auth');  // Navigate to the auth route when not authenticated
     }
-    console.log("Auth detials:::::::::::::::::::::>",userID, token, name, imageURL);
-    
-  }, [userID, router, name, imageURL]);
+  }, [isLoggedIn, router]);
 
   return <Stack screenOptions={{ headerShown: false }} />;
 }

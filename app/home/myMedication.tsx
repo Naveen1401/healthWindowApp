@@ -1,7 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useContext } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, SafeAreaView, TextInput } from 'react-native';
 import MedicationModal from '../../components/MedicationModal';
 import { FormatTimeDisplay } from '@/util/DateTimeFormet';
+import useApi from '@/CustomHooks/useCallAPI';
+import { AuthContext } from '@/context/AuthContext';
 
 interface Medication {
     id ?: number;
@@ -18,26 +20,22 @@ const MyMedication = () => {
     const [filteredMedications, setFilteredMedications] = useState<Medication[]>([]);
     const [selectedMedication, setSelectedMedication] = useState<Medication | null>(null);
     const [modalVisible, setModalVisible] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
+    const {callApi: callFetchMedicationApi, loading: loadingMedications} = useApi(); 
+    const {callApi} = useApi();
+    const {user} = useContext(AuthContext);
 
     const fetchMedications = async () => {
-        setIsLoading(true);
         try {
-            const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_SERVER}/patient/getAllMedicationSchedules`, {
+            const response = await callFetchMedicationApi({
+                url: `${process.env.EXPO_PUBLIC_BACKEND_SERVER}/patient/getAllMedicationSchedules`,
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
-                    "Patient-Id": '1',
+                    "Patient-Id": user?.id??'-1',
                 },
             });
 
-            if (!response.ok) {
-                throw new Error('Failed to fetch medications');
-            }
-
-            const responseData = await response.json();
-
-            const formattedData = responseData.data.map((item: any) => ({
+            const formattedData = response.data.map((item: any) => ({
                 id: item.medication_id,
                 medicine_name: item.medicine_name,
                 description: item.description,
@@ -52,8 +50,6 @@ const MyMedication = () => {
         } catch (error) {
             console.error('Error fetching medications:', error);
             Alert.alert('Error', 'Failed to load medications');
-        } finally {
-            setIsLoading(false);
         }
     };
 
@@ -76,17 +72,14 @@ const MyMedication = () => {
                     text: 'Delete',
                     onPress: async () => {
                         try {
-                            const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_SERVER}/patient/deleteMedicationSchedules?medicationId=${medication.id}`, {
+                            const response = await callApi({
+                                url:`${process.env.EXPO_PUBLIC_BACKEND_SERVER}/patient/deleteMedicationSchedules?medicationId=${medication.id}`,
                                 method: "DELETE",
                                 headers: {
                                     "Content-Type": "application/json",
-                                    "Patient-Id": '1',
+                                    "Patient-Id": user?.id??'-1',
                                 }
                             });
-
-                            if (!response.ok) {
-                                throw new Error('Failed to delete medication');
-                            }
 
                             setMedications(prev => prev.filter(med => med.id !== medication.id));
                             setFilteredMedications(prev => prev.filter(med => med.id !== medication.id));
@@ -108,11 +101,12 @@ const MyMedication = () => {
         if (!selectedMedication) return;
 
         try {
-            const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_SERVER}/patient/addMedicationSchedule`, {
+            const response = await callApi({
+                url: `${process.env.EXPO_PUBLIC_BACKEND_SERVER}/patient/addMedicationSchedule`,
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "Patient-Id": '1',
+                    "Patient-Id": user?.id??'-1',
                 },
                 body: JSON.stringify({
                     medication_id: selectedMedication.id,
@@ -124,11 +118,7 @@ const MyMedication = () => {
                     intake_time_list: updatedData.intake_time_list
                 }),
             });
-
-            if (!response.ok) {
-                throw new Error('Failed to update medication');
-            }
-
+            
             setMedications(prev => prev.map(med =>
                 med.id === selectedMedication.id ? {
                     ...med,
@@ -206,7 +196,7 @@ const MyMedication = () => {
                 style={{ padding: 10, borderWidth: 1, borderColor: '#ccc', borderRadius: 5, marginVertical: 10, marginHorizontal: 20 }}
                 onChangeText= {(text)=>{handleSearch(text)}}
             />
-            {isLoading ? (
+            {loadingMedications ? (
                 <Text style={styles.loadingText}>Loading medications...</Text>
             ) : filteredMedications.length === 0 ? (
                 <Text style={styles.emptyText}>No medications found</Text>

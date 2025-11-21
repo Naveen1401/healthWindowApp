@@ -1,10 +1,13 @@
 // Medication.tsx (updated)
 import MedicationTab from '@/components/MedicationTab';
-import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, Modal, Button, ScrollView, SafeAreaView, Alert } from 'react-native';
+import React, { useContext, useEffect, useRef, useState } from 'react';
+import { View, Text, StyleSheet, Modal, Button, ScrollView, SafeAreaView, Alert, Pressable, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { ExpandableCalendar, CalendarProvider, AgendaList } from 'react-native-calendars';
 import MedicationModal from '../../components/MedicationModal';
 import {DateFormat} from '@/util/DateTimeFormet';
+import { useRouter } from 'expo-router';
+import useApi from '@/CustomHooks/useCallAPI';
+import { AuthContext } from '@/context/AuthContext';
 
 interface AgendaItem {
     intakeTime: string;
@@ -34,6 +37,10 @@ const Medication = () => {
     const [modalVisible, setModalVisible] = useState(false);
     const [agendaItems, setAgendaItems] = useState<AgendaSection[]>([]);
     const [selectedDate, setSelectedDate] = useState<string>(todayDate);
+    const router = useRouter();
+    const { callApi: callMedicationApi, loading: loadingMedication } = useApi();
+    const { callApi } = useApi();
+    const {user} = useContext(AuthContext);
 
     const [medicine, setMedicine] = useState<Medicine>({
         medicine_name: '',
@@ -45,20 +52,23 @@ const Medication = () => {
     });
 
     const sendMedicationData = async (medData: Medicine) => {
-        const response = await fetch(process.env.EXPO_PUBLIC_BACKEND_SERVER + '/patient/addMedicationSchedule', {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Patient-Id": '1',
-            },
-            body: JSON.stringify(medData),
-        });
-        const json = await response.json();
-        if (response.ok) {
+        try{
+            const response = await callApi({
+                url: process.env.EXPO_PUBLIC_BACKEND_SERVER + '/patient/addMedicationSchedule',
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Patient-Id": user?.id ?? '-1',
+                },
+                body: JSON.stringify(medData),
+            });
+
             Alert.alert('Success', 'Medication added successfully');
             return true;
+        }catch(err){
+            console.log(err);
+            return false;
         }
-        return false;
     }
 
     const handleSave = async (medData: Medicine) => {
@@ -129,21 +139,18 @@ const Medication = () => {
     const dateChangeHandler = async (date: string) => {
         setSelectedDate(date);
         try {
-            const response = await fetch(process.env.EXPO_PUBLIC_BACKEND_SERVER + '/patient/getMedicationSchedule', {
+            const response = await callMedicationApi({
+                url: process.env.EXPO_PUBLIC_BACKEND_SERVER + '/patient/getMedicationSchedule',
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "Patient-Id": '1',
+                    "Patient-Id": user?.id??'-1',
                 },
                 body: JSON.stringify({ date }),
             });
-
-            if (!response.ok) {
-                throw new Error('Failed to fetch medication schedule');
-            }
-
-            const json = await response.json();
-            AgendaItemsHandler(json, date);
+            console.log("Medication response: ",response);
+            
+            AgendaItemsHandler(response, date);
         } catch (error) {
             console.error('Error fetching medication schedule:', error);
             Alert.alert('Error', 'Failed to load medication schedule');
@@ -154,6 +161,16 @@ const Medication = () => {
         dateChangeHandler(todayDate);
     }, []);
 
+    if (loadingMedication && agendaItems.length === 0) {
+        return (
+            <SafeAreaView style={styles.container}>
+                <View style={styles.center}>
+                    <ActivityIndicator/>
+                </View>
+            </SafeAreaView>
+        );
+    }
+
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.medicationheader}>
@@ -161,11 +178,14 @@ const Medication = () => {
                 <Button title='Add +' onPress={() => setModalVisible(true)} />
             </View>
             <CalendarProvider
-                date={todayDate}
+                date={selectedDate}
                 onDateChanged={(date) => { dateChangeHandler(date) }}
                 showTodayButton
             >
                 <ExpandableCalendar />
+                <TouchableOpacity style={styles.allmedications} onPress={() => router.push('/home/myMedication')}>
+                    <Text style={{ color: '#007bff', fontSize: 18, marginLeft: 15 }}>All Medications</Text>
+                </TouchableOpacity>
                 {agendaItems.length > 0 ? <AgendaList
                     sections={agendaItems}
                     renderItem={(item: { item: AgendaItem }) => {
@@ -184,7 +204,6 @@ const Medication = () => {
                     }}
                 /> : <></>}
             </CalendarProvider>
-
             <MedicationModal
                 visible={modalVisible}
                 onClose={() => setModalVisible(false)}
@@ -205,6 +224,16 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         flexDirection: 'row',
         paddingHorizontal: 20,
+    },
+    allmedications:{
+        backgroundColor: 'white',
+        alignItems: 'flex-end',
+        paddingHorizontal: 20
+    },
+    center: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
     },
 });
 

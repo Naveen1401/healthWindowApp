@@ -8,8 +8,8 @@ interface DoctorDetails {
 interface Doctor {
     id: number;
     userId: number;
-    firstName: string;
-    lastName: string;
+    first_name: string;
+    last_name: string;
     affiliatedPatientIds: number[] | null;
     doctorDetails: DoctorDetails;
     requestedAffiliationPatientIds: number[] | null;

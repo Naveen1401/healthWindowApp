@@ -66,7 +66,7 @@ const ReportListItem:React.FC<ReportListItemProps> = ({report, handleDelete, han
                 <View style={style.modalOverlay}>
                     <View style={style.menuContainer}>
                         <View style={style.menuItem}><Button color='red' title='Delete' onPress={() => handleOptionSelect('delete')} /></View>
-                        <View style={style.menuItem}><Button title='Edit' onPress={() => handleOptionSelect('edit')} /></View>
+                        <View style={style.menuItem}><Button title='Edit Access' onPress={() => handleOptionSelect('edit')} /></View>
                         <View style={{padding:5}}><Button title='Cancel' onPress={() => handleOptionSelect('cancel')} /></View>
                     </View>
                 </View>
