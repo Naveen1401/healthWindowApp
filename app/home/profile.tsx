@@ -14,6 +14,9 @@ import * as ImagePicker from "expo-image-picker";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { AuthContext } from "@/context/AuthContext";
 import useApi from "@/CustomHooks/useCallAPI";
+import { BackSVG } from "@/assets/svgComponents/generalSVGs";
+import { useNavigation } from "expo-router";
+import GlobalStyleSheet from "../globalStyle";
 
 export default function Profile({ navigation }: any) {
   const { user, logout } = useContext(AuthContext);
@@ -29,6 +32,7 @@ export default function Profile({ navigation }: any) {
   const [profileImage, setProfileImage] = useState(user?.imageURL || "");
 
   const [isEditing, setIsEditing] = useState(false);
+  const navigate = useNavigation();
 
   // 🔹 Top Navigation Buttons: Cancel on Left, Save/Edit on Right
   useLayoutEffect(() => {
@@ -126,109 +130,117 @@ export default function Profile({ navigation }: any) {
     <SafeAreaView style={styles.container}>
       {/* Centered Profile Title for fallback layout (non-navigation mode) */}
       {!navigation && (
-        <View style={styles.headerContainer}>
-          {isEditing && (
-            <TouchableOpacity
-              onPress={() => {
-                setIsEditing(false);
-                resetForm();
-              }}
-            >
-              <Text style={[styles.headerButtonText, { color: "red" }]}>Cancel</Text>
+        <View style={GlobalStyleSheet.header}>
+            {!isEditing?(
+              <TouchableOpacity
+                style={GlobalStyleSheet.backBtn}
+                onPress={() => navigate.goBack()}
+              >
+                <BackSVG style={GlobalStyleSheet.backIcon} />
+              </TouchableOpacity>
+            ):(
+              <TouchableOpacity
+                style={styles.cancelBtn}
+                onPress={() => {
+                  setIsEditing(false);
+                  resetForm();
+                }}
+              >
+                <Text style={[styles.headerButtonText, { color: "red" }]}>Cancel</Text>
+              </TouchableOpacity>
+            )}
+
+            {/* Title */}
+            <Text style={GlobalStyleSheet.mainHeading}>Medication Record</Text>
+          <TouchableOpacity style={GlobalStyleSheet.addBtn} onPress={() => {
+                if (isEditing) saveProfile();
+                else setIsEditing(true);
+          }}>
+              <Text style={{ color: '#2563EB', fontSize: 16 }}>{isEditing ? "Save" : "Edit"}</Text>
             </TouchableOpacity>
-          )}
-
-          <Text style={styles.headerTitle}>Profile</Text>
-
-          <TouchableOpacity
-            onPress={() => {
-              if (isEditing) saveProfile();
-              else setIsEditing(true);
-            }}
-          >
-            <Text style={styles.headerButtonText}>
-              {isEditing ? "Save" : "Edit"}
-            </Text>
-          </TouchableOpacity>
         </View>
       )}
+      <View style={{padding:20}}>
+        <TouchableOpacity
+          onPress={() => {
+            if (isEditing) pickImageFromGallery();
+          }}
+          activeOpacity={isEditing ? 0.7 : 1}
+          style={styles.imageWrapper}
+        >
+          <Image source={{ uri: profileImage }} style={styles.profileImage} />
+          {isEditing && (
+            <View style={styles.cameraOverlay}>
+              <Text style={styles.cameraText}>Change</Text>
+            </View>
+          )}
+        </TouchableOpacity>
 
-      <TouchableOpacity
-        onPress={() => {
-          if (isEditing) pickImageFromGallery();
-        }}
-        activeOpacity={isEditing ? 0.7 : 1}
-        style={styles.imageWrapper}
-      >
-        <Image source={{ uri: profileImage }} style={styles.profileImage} />
-        {isEditing && (
-          <View style={styles.cameraOverlay}>
-            <Text style={styles.cameraText}>Change</Text>
-          </View>
-        )}
-      </TouchableOpacity>
+        {/* First Name */}
+        <View style={styles.fieldContainer}>
+          <Text style={styles.label}>First Name</Text>
+          {isEditing ? (
+            <TextInput
+              value={firstName}
+              onChangeText={setFirstName}
+              style={styles.input}
+            />
+          ) : (
+            <Text style={styles.value}>{firstName}</Text>
+          )}
+        </View>
 
-      {/* First Name */}
-      <View style={styles.fieldContainer}>
-        <Text style={styles.label}>First Name</Text>
-        {isEditing ? (
-          <TextInput
-            value={firstName}
-            onChangeText={setFirstName}
-            style={styles.input}
-          />
-        ) : (
-          <Text style={styles.value}>{firstName}</Text>
+        {/* Last Name */}
+        <View style={styles.fieldContainer}>
+          <Text style={styles.label}>Last Name</Text>
+          {isEditing ? (
+            <TextInput
+              value={lastName}
+              onChangeText={setLastName}
+              style={styles.input}
+            />
+          ) : (
+            <Text style={styles.value}>{lastName}</Text>
+          )}
+        </View>
+
+        {/* Phone Number */}
+        <View style={styles.fieldContainer}>
+          <Text style={styles.label}>Phone Number</Text>
+          {isEditing ? (
+            <TextInput
+              value={phoneNumber}
+              onChangeText={setPhoneNumber}
+              keyboardType="phone-pad"
+              placeholder="Enter phone number"
+              style={styles.input}
+            />
+          ) : (
+            <Text style={styles.value}>{phoneNumber || "Not provided"}</Text>
+          )}
+        </View>
+
+        {/* Email (not editable) */}
+        <View style={styles.fieldContainer}>
+          <Text style={styles.label}>Email</Text>
+          <Text style={[styles.value, { color: "#555" }]}>{email}</Text>
+        </View>
+
+        <Button title="Log Out" color={"red"} onPress={logout} />
+
+        {loading && (
+          <ActivityIndicator size="large" color="#0000ff" style={{ marginTop: 24 }} />
         )}
       </View>
-
-      {/* Last Name */}
-      <View style={styles.fieldContainer}>
-        <Text style={styles.label}>Last Name</Text>
-        {isEditing ? (
-          <TextInput
-            value={lastName}
-            onChangeText={setLastName}
-            style={styles.input}
-          />
-        ) : (
-          <Text style={styles.value}>{lastName}</Text>
-        )}
-      </View>
-
-      {/* Phone Number */}
-      <View style={styles.fieldContainer}>
-        <Text style={styles.label}>Phone Number</Text>
-        {isEditing ? (
-          <TextInput
-            value={phoneNumber}
-            onChangeText={setPhoneNumber}
-            keyboardType="phone-pad"
-            placeholder="Enter phone number"
-            style={styles.input}
-          />
-        ) : (
-          <Text style={styles.value}>{phoneNumber || "Not provided"}</Text>
-        )}
-      </View>
-
-      {/* Email (not editable) */}
-      <View style={styles.fieldContainer}>
-        <Text style={styles.label}>Email</Text>
-        <Text style={[styles.value, { color: "#555" }]}>{email}</Text>
-      </View>
-
-      <Button title="Log Out" color={"red"} onPress={logout} />
-
-      {loading && (
-        <ActivityIndicator size="large" color="#0000ff" style={{ marginTop: 24 }} />
-      )}
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: "#F9FAFB" },
+  container: { 
+    flex: 1,
+    backgroundColor: "#F9FAFB" 
+  },
 
   headerContainer: {
     flexDirection: "row",
@@ -287,5 +299,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#111827",
     backgroundColor: "#FFF",
+  },
+  cancelBtn: {
+    position: "absolute",
+    left: 16,   // distance from left
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

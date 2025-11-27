@@ -12,6 +12,10 @@ import {
 import { Camera, CameraView, useCameraPermissions, BarcodeScanningResult } from "expo-camera";
 import { AuthContext } from "@/context/AuthContext";
 import useApi from "@/CustomHooks/useCallAPI";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import GlobalStyleSheet from "../globalStyle";
+import { BackSVG } from "@/assets/svgComponents/generalSVGs";
+import { useNavigation } from "expo-router";
 
 const DoctorAffiliation: React.FC = () => {
     const { user } = useContext(AuthContext);
@@ -21,6 +25,7 @@ const DoctorAffiliation: React.FC = () => {
     const [scanning, setScanning] = useState<boolean>(false);
     const { callApi: callDoctorApi, loading: loadingDocter } = useApi();
     const { callApi } = useApi();
+    const navigate = useNavigation();
 
     useEffect(() => {
         if (!permission) requestPermission();
@@ -109,9 +114,9 @@ const DoctorAffiliation: React.FC = () => {
     }
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
             {scanning ? (
-                <View style={{ flex: 1 }}>
+                <View>
                     <CameraView
                         style={StyleSheet.absoluteFillObject}
                         facing="back"
@@ -124,50 +129,62 @@ const DoctorAffiliation: React.FC = () => {
                 </View>
             ) : (
                 <>
-                    <Text style={styles.title}>Link with Doctor</Text>
+                    <View style={GlobalStyleSheet.header}>
+                        {/* Back Button */}
+                        <TouchableOpacity
+                            style={GlobalStyleSheet.backBtn}
+                            onPress={() => navigate.goBack()}
+                        >
+                            <BackSVG style={GlobalStyleSheet.backIcon} />
+                        </TouchableOpacity>
 
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Enter Doctor Code"
-                        keyboardType="numeric"
-                        value={doctorId}
-                        onChangeText={setDoctorId}
-                    />
+                        {/* Title */}
+                            <Text style={GlobalStyleSheet.mainHeading}>Link with Doctor</Text>
+                    </View>
+                    <View style={{padding:10}}>
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Enter Doctor Code"
+                            keyboardType="numeric"
+                            value={doctorId}
+                            onChangeText={setDoctorId}
+                        />
 
-                    <TouchableOpacity
-                        style={styles.scanButton}
-                        onPress={() => setScanning(true)}
-                    >
-                        <Text style={styles.scanButtonText}>📷 Scan QR Code</Text>
-                    </TouchableOpacity>
+                        <TouchableOpacity
+                            style={styles.scanButton}
+                            onPress={() => setScanning(true)}
+                        >
+                            <Text style={styles.scanButtonText}>📷 Scan QR Code</Text>
+                        </TouchableOpacity>
 
-                    <TouchableOpacity
-                        style={styles.fetchButton}
-                        onPress={() => fetchDoctorDetails(doctorId)}
-                    >
-                        <Text style={styles.fetchButtonText}>Fetch Doctor Details</Text>
-                    </TouchableOpacity>
+                        <TouchableOpacity
+                            style={styles.fetchButton}
+                            onPress={() => fetchDoctorDetails(doctorId)}
+                        >
+                            <Text style={styles.fetchButtonText}>Fetch Doctor Details</Text>
+                        </TouchableOpacity>
 
-                    {loadingDocter && <ActivityIndicator size="large" style={{ marginVertical: 10 }} />}
+                        {loadingDocter && <ActivityIndicator size="large" style={{ marginVertical: 10 }} />}
 
-                    {doctorData && (
-                        <View style={styles.doctorCard}>
-                            <Image source={{ uri: doctorData.image_url }} style={styles.image} />
-                            <Text style={styles.name}>
-                                {doctorData.first_name} {doctorData.last_name}
-                            </Text>
-                            <Text>Email: {doctorData.email}</Text>
-                            <Text>Experience: {doctorData.doctor_details.yrs_of_exp} years</Text>
-                            <Text>Status: {doctorData.status}</Text>
-                        </View>
-                    )}
+                        {doctorData && (
+                            <View style={styles.doctorCard}>
+                                <Image source={{ uri: doctorData.image_url }} style={styles.image} />
+                                <Text style={styles.name}>
+                                    {doctorData.first_name} {doctorData.last_name}
+                                </Text>
+                                <Text>Email: {doctorData.email}</Text>
+                                <Text>Experience: {doctorData.doctor_details.yrs_of_exp} years</Text>
+                                <Text>Status: {doctorData.status}</Text>
+                            </View>
+                        )}
 
-                    <TouchableOpacity style={styles.sendButton} onPress={sendAffiliationRequest}>
-                        <Text style={styles.sendButtonText}>Send Request</Text>
-                    </TouchableOpacity>
+                        <TouchableOpacity style={styles.sendButton} onPress={sendAffiliationRequest}>
+                            <Text style={styles.sendButtonText}>Send Request</Text>
+                        </TouchableOpacity>
+                    </View>
                 </>
             )}
-        </View>
+        </SafeAreaView>
     );
 };
 
@@ -175,10 +192,7 @@ export default DoctorAffiliation;
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
-        backgroundColor: "#fff",
-        padding: 20,
-        justifyContent: "center",
+        height: '100%',
     },
     center: {
         flex: 1,

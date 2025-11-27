@@ -11,6 +11,9 @@ import {
     Linking
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import GlobalStyleSheet from "../globalStyle";
+import { BackSVG } from "@/assets/svgComponents/generalSVGs";
+import { useNavigation } from "expo-router";
 
 export type ConsultationItem = {
     id: number;
@@ -30,10 +33,11 @@ export type ConsultationItem = {
 
 const MyConsultations = () => {
     const [consultations, setConsultations] = useState<ConsultationItem[]>([]);
-    const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const {user} = useContext(AuthContext);
-    const {callApi, loading: consultationsLoading} = useApi();
+    const {callApi, loading} = useApi();
+    const navigate = useNavigation();
+
 
     const fetchConsultations = async () => {
         try {
@@ -53,8 +57,6 @@ const MyConsultations = () => {
             }
         } catch (err) {
             setError("Network error, please try again");
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -132,7 +134,18 @@ const MyConsultations = () => {
 
     return (
         <SafeAreaView style={styles.container}>
-            <Text style={styles.header}>Your Consultation Schedule</Text>
+            <View style={GlobalStyleSheet.header}>
+                {/* Back Button */}
+                <TouchableOpacity
+                    style={GlobalStyleSheet.backBtn}
+                    onPress={() => navigate.goBack()}
+                >
+                    <BackSVG style={GlobalStyleSheet.backIcon} />
+                </TouchableOpacity>
+
+                {/* Title */}
+                <Text style={GlobalStyleSheet.mainHeading}>Consultation Schedule</Text>
+            </View>
             {consultations.length===0?
                 <View style={styles.center}>
                     <Text style={{ color: "grey", fontSize: 16 }}>To consultation Scheduled yet</Text>
@@ -154,8 +167,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#F3F6FB",
-        paddingHorizontal: 16,
-        paddingTop: 20,
     },
     header: {
         fontSize: 24,

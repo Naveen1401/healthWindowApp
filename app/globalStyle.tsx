@@ -13,6 +13,31 @@ const GlobalStyleSheet = StyleSheet.create({
         fontWeight:"500",
         margin: "auto",
         paddingVertical: 10,
+    },
+    header: {
+        height: 55,
+        justifyContent: "center",
+        alignItems: "center",
+        position: "relative",
+
+    },
+    backBtn: {
+        position: "absolute",
+        left: 16,   // distance from left
+        height: 40,
+        width: 40,
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    backIcon: {
+        height: 26,
+        width: 26,
+    },
+    addBtn:{
+        position: "absolute",
+        right: 16,   // distance from left
+        justifyContent: "center",
+        alignItems: "center",
     }
 });
 

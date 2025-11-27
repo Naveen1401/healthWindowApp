@@ -14,7 +14,7 @@ export default function HomeScreen() {
         <Pressable style={styles.addDocter}>
           <Button title="Add +" onPress={() => router.push('/home/docterAffiliation')} />
         </Pressable>
-        <Text style={styles.mainHeading}>{user?.name}! 👋🏽 </Text>
+        <Text style={styles.mainHeading}>Hey {user?.name.split(" ")[0]}! 👋🏽 </Text>
         <TouchableOpacity style={styles.profileIcon} onPress={() => router.push('/home/profile')}>
           <Image 
             source={user?.imageURL

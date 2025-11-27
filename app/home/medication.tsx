@@ -5,9 +5,11 @@ import { View, Text, StyleSheet, Modal, Button, ScrollView, SafeAreaView, Alert,
 import { ExpandableCalendar, CalendarProvider, AgendaList } from 'react-native-calendars';
 import MedicationModal from '../../components/MedicationModal';
 import {DateFormat} from '@/util/DateTimeFormet';
-import { useRouter } from 'expo-router';
+import { useNavigation, useRouter } from 'expo-router';
 import useApi from '@/CustomHooks/useCallAPI';
 import { AuthContext } from '@/context/AuthContext';
+import { BackSVG } from '@/assets/svgComponents/generalSVGs';
+import GlobalStyleSheet from '../globalStyle';
 
 interface AgendaItem {
     intakeTime: string;
@@ -41,6 +43,7 @@ const Medication = () => {
     const { callApi: callMedicationApi, loading: loadingMedication } = useApi();
     const { callApi } = useApi();
     const {user} = useContext(AuthContext);
+    const navigate = useNavigation();
 
     const [medicine, setMedicine] = useState<Medicine>({
         medicine_name: '',
@@ -173,9 +176,20 @@ const Medication = () => {
 
     return (
         <SafeAreaView style={styles.container}>
-            <View style={styles.medicationheader}>
-                <Text style={{ fontSize: 16 }}>Medication Record</Text>
-                <Button title='Add +' onPress={() => setModalVisible(true)} />
+            <View style={GlobalStyleSheet.header}>
+                {/* Back Button */}
+                <TouchableOpacity
+                    style={GlobalStyleSheet.backBtn}
+                    onPress={() => navigate.goBack()}
+                >
+                    <BackSVG style={GlobalStyleSheet.backIcon} />
+                </TouchableOpacity>
+
+                {/* Title */}
+                <Text style={GlobalStyleSheet.mainHeading}>Medication Record</Text>
+                <TouchableOpacity style={GlobalStyleSheet.addBtn} onPress={() => setModalVisible(true)}>
+                    <Text style={{ color:'#2563EB', fontSize: 16}}>Add +</Text>
+                </TouchableOpacity>
             </View>
             <CalendarProvider
                 date={selectedDate}

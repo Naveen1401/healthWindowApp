@@ -1,14 +1,15 @@
-import { Text, SafeAreaView, StyleSheet, View, Button, ActivityIndicator, ScrollView, Alert } from 'react-native'
+import { Text, SafeAreaView, StyleSheet, View, Button, ActivityIndicator, Alert, TouchableOpacity } from 'react-native'
 import React, { useContext, useEffect, useState } from 'react'
 import UploadReport from '@/components/UploadReport'
 import ReportListItem from '@/components/ReportListItem'
 import GlobalStyleSheet from '../globalStyle'
-import { router } from 'expo-router'
+import { router, useNavigation } from 'expo-router'
 import { useApi } from "@/CustomHooks/useCallAPI"
 import { AuthContext } from '@/context/AuthContext'
 import { ReportDataContext } from '@/context/ReportContext'
 import { DoctorDataContext } from '@/context/DoctorContext'
 import AccessibilityAndAffiliationForReport from '@/components/AccessibilityAndAffiliationForReport'
+import { BackSVG } from '@/assets/svgComponents/generalSVGs'
 
 interface ReportType {
   id: number,
@@ -47,6 +48,7 @@ const UploadReports = () => {
   const { doctorData, setDoctorData } = useContext(DoctorDataContext);
   const [openModel, setOpenModel] = useState<boolean>(false);
   const [selectedReportID, setSelectedReportID] = useState<number>(-1);
+  const navigate = useNavigation();
 
   const { user } = useContext(AuthContext);
 
@@ -161,7 +163,16 @@ const UploadReports = () => {
 
   return (
     <SafeAreaView style={style.uploadRportsMainContainer}>
-      <Text style={GlobalStyleSheet.mainHeading}>Upload Reports</Text>
+      <View style={GlobalStyleSheet.header}>
+        <TouchableOpacity
+          style={GlobalStyleSheet.backBtn}
+          onPress={() => navigate.goBack()}
+        >
+          <BackSVG style={GlobalStyleSheet.backIcon} />
+        </TouchableOpacity>
+
+        <Text style={GlobalStyleSheet.mainHeading}>Upload Reports</Text>
+      </View>
       <View style={{ height: '40%' }}><UploadReport handleUploadSuccess={handleUploadSuccess} /></View>
       {loadingReports ? (
         <ActivityIndicator />
@@ -203,7 +214,7 @@ const style = StyleSheet.create({
     marginHorizontal: 20,
     fontWeight: "bold",
     marginBottom: 10
-  }
+  },
 });
 
 export default UploadReports

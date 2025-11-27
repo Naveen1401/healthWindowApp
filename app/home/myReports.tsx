@@ -1,4 +1,4 @@
-import { Text, SafeAreaView, StyleSheet, TextInput, Alert, ScrollView } from 'react-native'
+import { Text, SafeAreaView, StyleSheet, TextInput, Alert, ScrollView, View, TouchableOpacity } from 'react-native'
 import React, { useCallback, useContext, useEffect, useState } from 'react'
 import GlobalStyleSheet from '../globalStyle'
 import ReportListItem from '@/components/ReportListItem'
@@ -7,7 +7,8 @@ import AccessibilityAndAffiliationForReport from '@/components/AccessibilityAndA
 import { DoctorDataContext } from '@/context/DoctorContext'
 import useApi from '@/CustomHooks/useCallAPI'
 import { AuthContext } from '@/context/AuthContext'
-import { router } from 'expo-router'
+import { router, useNavigation } from 'expo-router'
+import { BackSVG } from '@/assets/svgComponents/generalSVGs'
 
 interface ReportType {
     id: number,
@@ -28,6 +29,7 @@ const MyReports = () => {
     const [selectedReportID, setSelectedReportID] = useState<number>(-1);
     const { callApi } = useApi();
     const {user} = useContext(AuthContext);
+    const navigate = useNavigation();
     
 
     const handleEdit = (report: ReportType) => {
@@ -104,7 +106,18 @@ const MyReports = () => {
 
     return (
         <SafeAreaView style={style.myReportsMainContainer}>
-            <Text style={GlobalStyleSheet.mainHeading}>My Reports</Text>
+            <View style={GlobalStyleSheet.header}>
+                {/* Back Button */}
+                <TouchableOpacity
+                    style={GlobalStyleSheet.backBtn}
+                    onPress={() => navigate.goBack()}
+                >
+                    <BackSVG style={GlobalStyleSheet.backIcon} />
+                </TouchableOpacity>
+
+                {/* Title */}
+                <Text style={GlobalStyleSheet.mainHeading}>My Reports</Text>
+            </View>
             <TextInput
                 placeholder='Search report name...'
                 style={{ padding: 10, borderWidth: 1, borderColor: '#ccc', borderRadius: 5, marginVertical: 10, marginHorizontal: 20, backgroundColor: "white" }}

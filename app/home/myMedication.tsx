@@ -4,6 +4,9 @@ import MedicationModal from '../../components/MedicationModal';
 import { FormatTimeDisplay } from '@/util/DateTimeFormet';
 import useApi from '@/CustomHooks/useCallAPI';
 import { AuthContext } from '@/context/AuthContext';
+import GlobalStyleSheet from '../globalStyle';
+import { BackSVG } from '@/assets/svgComponents/generalSVGs';
+import { useNavigation } from 'expo-router';
 
 interface Medication {
     id ?: number;
@@ -23,6 +26,7 @@ const MyMedication = () => {
     const {callApi: callFetchMedicationApi, loading: loadingMedications} = useApi(); 
     const {callApi} = useApi();
     const {user} = useContext(AuthContext);
+    const navigate = useNavigation();
 
     const fetchMedications = async () => {
         try {
@@ -190,7 +194,18 @@ const MyMedication = () => {
 
     return (
         <SafeAreaView style={styles.container}>
-            <Text style={styles.header}>My Medications</Text>
+            <View style={GlobalStyleSheet.header}>
+                {/* Back Button */}
+                <TouchableOpacity
+                    style={GlobalStyleSheet.backBtn}
+                    onPress={() => navigate.goBack()}
+                >
+                    <BackSVG style={GlobalStyleSheet.backIcon} />
+                </TouchableOpacity>
+
+                {/* Title */}
+                <Text style={GlobalStyleSheet.mainHeading}>My Medications</Text>
+            </View>
             <TextInput
                 placeholder='Search medications...'
                 style={{ padding: 10, borderWidth: 1, borderColor: '#ccc', borderRadius: 5, marginVertical: 10, marginHorizontal: 20 }}

@@ -1,8 +1,9 @@
-import { SafeAreaView, View, Text, StyleSheet, Pressable } from "react-native";
+import { SafeAreaView, View, Text, StyleSheet, Pressable, TouchableOpacity } from "react-native";
 import React from "react";
 import {healthDataTabData} from '@/util/SystemData'
 import GlobalStyleSheet from "../globalStyle";
-import { router } from "expo-router";
+import { router, useNavigation } from "expo-router";
+import { BackSVG } from "@/assets/svgComponents/generalSVGs";
 
 const HealthDataTab = (props : {svgName:string, title:string, healthType:string}) => {
     const { svgName, title, healthType } = props;
@@ -24,9 +25,21 @@ const HealthDataTab = (props : {svgName:string, title:string, healthType:string}
 };
 
 const HealthData = () => {
+    const navigation = useNavigation();
     return (
         <SafeAreaView>
-        <Text style={GlobalStyleSheet.mainHeading}>Health Data</Text>
+            <View style={GlobalStyleSheet.header}>
+                {/* Back Button */}
+                <TouchableOpacity
+                    style={GlobalStyleSheet.backBtn}
+                    onPress={() => navigation.goBack()}
+                >
+                    <BackSVG style={GlobalStyleSheet.backIcon} />
+                </TouchableOpacity>
+
+                {/* Title */}
+                <Text style={GlobalStyleSheet.mainHeading}>Health Data</Text>
+            </View>
         <SafeAreaView style = {style.mainContainer}>
             {healthDataTabData.map((item)=>(
                 <HealthDataTab key={item.id} svgName={item.svgName} title={item.title} healthType={item.id}/>

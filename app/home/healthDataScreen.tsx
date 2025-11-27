@@ -7,11 +7,12 @@ import {
     Button,
     Alert,
     ActivityIndicator,
+    TouchableOpacity,
 } from "react-native";
 import GlobalStyleSheet from "../globalStyle";
 import { useContext, useEffect, useState } from "react";
 import useApi from "@/CustomHooks/useCallAPI";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useNavigation } from "expo-router";
 import HealthDataList from "@/components/HealthData/HealthDataList";
 import AddGlucose from "@/components/HealthData/AddForm/AddGlucose";
 import AddInsuline from "@/components/HealthData/AddForm/AddInsuline";
@@ -22,6 +23,7 @@ import GlucoseChart from "@/components/HealthData/Charts/GlucoseChart";
 import WeightChart from "@/components/HealthData/Charts/WeightChart";
 import InsulineChart from "@/components/HealthData/Charts/InsulineChart";
 import { AuthContext } from "@/context/AuthContext";
+import { BackSVG } from "@/assets/svgComponents/generalSVGs";
 
 const HealthDataScreen = () => {
     const { healthType, title } = useLocalSearchParams();
@@ -29,6 +31,7 @@ const HealthDataScreen = () => {
     const [healthData, setHealthData] = useState<any[]>([]);
     const { callApi, loading } = useApi();
     const {user} = useContext(AuthContext);
+    const navigate = useNavigation();
 
     const MODAL_COMPONENTS: Record<string, React.FC<any>> = {
         INSULIN: AddInsuline,
@@ -126,13 +129,28 @@ const HealthDataScreen = () => {
     return (
         <SafeAreaView style={{ flex: 1 }}>
             <View style={{ flex: 1 }}>
-                <View style={style.headingContainer}>
+                {/* <View style={style.headingContainer}>
                     <Text className="relative" style={GlobalStyleSheet.mainHeading}>
                         {title}
                     </Text>
                     <Pressable style={style.addContainer}>
                         <Button title="Add +" onPress={() => setVisible(true)} />
                     </Pressable>
+                </View> */}
+                <View style={GlobalStyleSheet.header}>
+                    {/* Back Button */}
+                    <TouchableOpacity
+                        style={GlobalStyleSheet.backBtn}
+                        onPress={() => navigate.goBack()}
+                    >
+                        <BackSVG style={GlobalStyleSheet.backIcon} />
+                    </TouchableOpacity>
+
+                    {/* Title */}
+                    <Text style={GlobalStyleSheet.mainHeading}>{title}</Text>
+                    <TouchableOpacity style={GlobalStyleSheet.addBtn} onPress={() => setVisible(true)}>
+                        <Text style={{ color: '#2563EB', fontSize: 16 }}>Add +</Text>
+                    </TouchableOpacity>
                 </View>
 
                 <HealthDataChart data={healthData} />
