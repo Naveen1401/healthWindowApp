@@ -1,5 +1,6 @@
 import React from "react";
-import { Text, View, SafeAreaView, TouchableOpacity, StyleSheet, Alert } from 'react-native'
+import { Text, View, TouchableOpacity, StyleSheet, Alert } from 'react-native'
+import { SafeAreaView} from 'react-native-safe-area-context'
 import { useContext, useEffect } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import * as Google from 'expo-auth-session/providers/google'
@@ -10,28 +11,52 @@ import {
     Poppins_600SemiBold,
 } from '@expo-google-fonts/poppins';
 
+
+
+import {
+    GoogleSignin,
+    GoogleSigninButton,
+    isErrorWithCode,
+    isSuccessResponse,
+    statusCodes,
+} from '@react-native-google-signin/google-signin';
+
+GoogleSignin.configure({
+    webClientId: process.env.EXPO_PUBLIC_WEB_CLIENT_ID,
+    iosClientId: process.env.EXPO_PUBLIC_IOS_CLIENT_ID
+});
+
 WebBrowser.maybeCompleteAuthSession();
 
 export default function AuthScreen() {
     const [fontsLoaded] = useFonts({
         Poppins_600SemiBold
     });
-    const config = {
-        androidClientId: process.env.EXPO_PUBLIC_ANDROID_CLIENT_ID,
-        iosClientId: process.env.EXPO_PUBLIC_IOS_CLIENT_ID,
-        webClientId: process.env.EXPO_PUBLIC_WEB_CLIENT_ID
-    };
+    // const config = {
+    //     androidClientId: process.env.EXPO_PUBLIC_ANDROID_CLIENT_ID,
+    //     iosClientId: process.env.EXPO_PUBLIC_IOS_CLIENT_ID,
+    //     webClientId: process.env.EXPO_PUBLIC_WEB_CLIENT_ID
+    // };
 
     const { setAuthData } = useContext(AuthContext);
 
-    const [request, response, promptAsync] = Google.useAuthRequest(config);
+    // const [request, response, promptAsync] = Google.useAuthRequest(config);
 
 
     const handleUserSign = async (user: any) => {
         try {
+            console.log(process.env.EXPO_PUBLIC_BACKEND_SERVER);
+            const backendUser = {
+                "email": user.email,
+                "family_name": user.familyName,
+                "given_name": user.givenName,
+                "id": user.id,
+                "name": user.name,
+                "picture": user.photo,
+            }
             const response = await fetch(process.env.EXPO_PUBLIC_BACKEND_SERVER + '/patient/getOrCreatePatient', {
                 method: 'POST',
-                body: JSON.stringify(user),
+                body: JSON.stringify(backendUser),
                 headers: { 'Content-Type': 'application/json; charset=UTF-8' }
             });
             const apiresponse = await response.json();
@@ -42,7 +67,8 @@ export default function AuthScreen() {
                         id: apiresponse?.data?.createdPatient?.id.toString(),
                         name: user.given_name+" "+user.family_name,
                         email: user.email,
-                        imageURL: user.picture
+                        imageURL: user.picture,
+                        phoneNo: apiresponse?.data?.createdPatient?.phone_no
                     },
                     apiresponse?.data?.accessToken,
                     apiresponse?.data?.refreshToken
@@ -55,32 +81,60 @@ export default function AuthScreen() {
         }
     }
 
-    const getUserProfile = async (token: any) => {
-        if (!token) return;
-        try {
-            const response = await fetch('https://www.googleapis.com/userinfo/v2/me', {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-            const user = await response.json();
-            handleUserSign(user);
+    const handleGoogleSignIn = async () => {
+        try{
+            await GoogleSignin.hasPlayServices();
+            const response = await GoogleSignin.signIn();
+            if (isSuccessResponse(response)) {
+                console.log(response.data.user)
+                handleUserSign(response.data.user);
+            } else {
+                // sign in was cancelled by user
+            }
         } catch (error) {
-            console.log(error);
+            if (isErrorWithCode (error)) {
+                switch (error.code) {
+                    case statusCodes.IN_PROGRESS:
+                        // operation (eg. sign in) already in progress
+                        break;
+                    case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
+                        // Android only, play services not available or outdated
+                        break;
+                    default:
+                    // some other error happened
+                }
+            } else {
+                // an error that's not related to google sign in occurred
+            }
         }
     }
 
-    const handleToken = () => {
-        if (response?.type === 'success') {
-            const { authentication } = response;
-            const token = authentication?.accessToken;
-            getUserProfile(token);
-        }
-    }
+    // const getUserProfile = async (token: any) => {
+    //     if (!token) return;
+    //     try {
+    //         const response = await fetch('https://www.googleapis.com/userinfo/v2/me', {
+    //             headers: {
+    //                 Authorization: `Bearer ${token}`
+    //             }
+    //         });
+    //         const user = await response.json();
+    //         handleUserSign(user);
+    //     } catch (error) {
+    //         console.log(error);
+    //     }
+    // }
 
-    useEffect(() => {
-        handleToken();
-    }, [response])
+    // const handleToken = () => {
+    //     if (response?.type === 'success') {
+    //         const { authentication } = response;
+    //         const token = authentication?.accessToken;
+    //         getUserProfile(token);
+    //     }
+    // }
+
+    // useEffect(() => {
+    //     handleToken();
+    // }, [response])
 
     if (!fontsLoaded) {
         return (
@@ -97,7 +151,7 @@ export default function AuthScreen() {
                 <Text style={style.headerText}>Window</Text>
             </View>
             <HomeSVG height={"50%"} />
-            <TouchableOpacity style={style.signInButton} onPress={() => promptAsync()}>
+            <TouchableOpacity style={style.signInButton} onPress={handleGoogleSignIn}>
                 <GoogleSVG style={{ marginRight: 20 }} height={20} width={20} />
                 <Text>SignIn With Google</Text>
             </TouchableOpacity>

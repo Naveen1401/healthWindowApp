@@ -12,7 +12,7 @@ import {
 import { Camera, CameraView, useCameraPermissions, BarcodeScanningResult } from "expo-camera";
 import { AuthContext } from "@/context/AuthContext";
 import useApi from "@/CustomHooks/useCallAPI";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 import GlobalStyleSheet from "../globalStyle";
 import { BackSVG } from "@/assets/svgComponents/generalSVGs";
 import { useNavigation } from "expo-router";
@@ -67,7 +67,7 @@ const DoctorAffiliation: React.FC = () => {
 
     const sendAffiliationRequest = async () => {
         if (!doctorId) {
-            Alert.alert("Error", "Please scan or enter a doctor code first.");
+            Alert.alert("Error", "Please scan or enter a doctor id first.");
             return;
         }
 
@@ -83,10 +83,10 @@ const DoctorAffiliation: React.FC = () => {
                 }
             );
 
-            if (response.status === 200) {
+            if (response.status === 201) {
                 Alert.alert("Success", "Affiliation request sent successfully!");
             } else {
-                Alert.alert("Failed", "Could not send affiliation request.");
+                Alert.alert("Failed", response.msg);
             }
         } catch (error) {
             console.error(error);
@@ -144,18 +144,18 @@ const DoctorAffiliation: React.FC = () => {
                     <View style={{padding:10}}>
                         <TextInput
                             style={styles.input}
-                            placeholder="Enter Doctor Code"
+                            placeholder= "Doctor ID"
                             keyboardType="numeric"
                             value={doctorId}
                             onChangeText={setDoctorId}
                         />
 
-                        <TouchableOpacity
+                        {/* <TouchableOpacity
                             style={styles.scanButton}
                             onPress={() => setScanning(true)}
                         >
                             <Text style={styles.scanButtonText}>📷 Scan QR Code</Text>
-                        </TouchableOpacity>
+                        </TouchableOpacity> */}
 
                         <TouchableOpacity
                             style={styles.fetchButton}
@@ -207,11 +207,14 @@ const styles = StyleSheet.create({
     },
     input: {
         borderWidth: 1,
+        width: '50%',
+        margin: 'auto',
         borderColor: "#ccc",
         borderRadius: 10,
-        padding: 10,
+        padding: 20,
         marginBottom: 15,
         fontSize: 16,
+        textAlign: 'center',
     },
     scanButton: {
         backgroundColor: "#2e86de",

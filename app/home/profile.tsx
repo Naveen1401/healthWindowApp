@@ -19,14 +19,15 @@ import { useNavigation } from "expo-router";
 import GlobalStyleSheet from "../globalStyle";
 
 export default function Profile({ navigation }: any) {
-  const { user, logout } = useContext(AuthContext);
+  const { user, logout, setUserData } = useContext(AuthContext);
 
   const name = user?.name?.split(" ") || ["", ""];
+  const phoneNo = user?.phoneNo || "";
   const [firstName, setFirstName] = useState(name[0]);
   const [lastName, setLastName] = useState(name[1]);
   const email = user?.email || "";
 
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState(phoneNo);
 
   const { callApi, loading } = useApi();
   const [profileImage, setProfileImage] = useState(user?.imageURL || "");
@@ -75,7 +76,7 @@ export default function Profile({ navigation }: any) {
     setFirstName(name[0]);
     setLastName(name[1]);
     setProfileImage(user?.imageURL || "");
-    setPhoneNumber(""); // reset phone
+    setPhoneNumber(phoneNo); // reset phone
   };
 
   const pickImageFromGallery = async () => {
@@ -101,10 +102,13 @@ export default function Profile({ navigation }: any) {
   const saveProfile = async () => {
     try {
       const body = {
-        firstName,
-        lastName,
-        phone: phoneNumber || null,
+        first_name: firstName,
+        last_name: lastName,
+        phone_no: phoneNumber || null,
       };
+
+      console.log(body);
+      
 
       await callApi({
         url:
@@ -117,6 +121,8 @@ export default function Profile({ navigation }: any) {
         },
         body: JSON.stringify(body),
       });
+
+      setUserData(firstName, lastName, phoneNumber);
 
       Alert.alert("Success", "Profile updated successfully!");
       setIsEditing(false);
@@ -176,6 +182,11 @@ export default function Profile({ navigation }: any) {
           )}
         </TouchableOpacity>
 
+        <View style={styles.fieldContainer}>
+          <Text style={styles.label}>Patient ID</Text>
+          <Text style={styles.value}>{user?.id}</Text>
+        </View>
+          
         {/* First Name */}
         <View style={styles.fieldContainer}>
           <Text style={styles.label}>First Name</Text>

@@ -1,4 +1,5 @@
-import { SafeAreaView, View, Text, StyleSheet, Pressable, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, Pressable, TouchableOpacity } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import React from "react";
 import {healthDataTabData} from '@/util/SystemData'
 import GlobalStyleSheet from "../globalStyle";
@@ -40,11 +41,11 @@ const HealthData = () => {
                 {/* Title */}
                 <Text style={GlobalStyleSheet.mainHeading}>Health Data</Text>
             </View>
-        <SafeAreaView style = {style.mainContainer}>
+            <View style = {style.mainContainer}>
             {healthDataTabData.map((item)=>(
                 <HealthDataTab key={item.id} svgName={item.svgName} title={item.title} healthType={item.id}/>
             ))}
-        </SafeAreaView>
+            </View>
         </SafeAreaView>
     )
 }

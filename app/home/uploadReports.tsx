@@ -1,4 +1,5 @@
-import { Text, SafeAreaView, StyleSheet, View, Button, ActivityIndicator, Alert, TouchableOpacity } from 'react-native'
+import { Text, StyleSheet, View, Button, ActivityIndicator, Alert, TouchableOpacity } from 'react-native'
+import { SafeAreaView } from "react-native-safe-area-context";
 import React, { useContext, useEffect, useState } from 'react'
 import UploadReport from '@/components/UploadReport'
 import ReportListItem from '@/components/ReportListItem'

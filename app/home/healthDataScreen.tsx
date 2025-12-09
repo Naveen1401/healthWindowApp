@@ -1,14 +1,12 @@
 import {
-    Pressable,
-    SafeAreaView,
     StyleSheet,
     Text,
     View,
-    Button,
     Alert,
     ActivityIndicator,
     TouchableOpacity,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import GlobalStyleSheet from "../globalStyle";
 import { useContext, useEffect, useState } from "react";
 import useApi from "@/CustomHooks/useCallAPI";

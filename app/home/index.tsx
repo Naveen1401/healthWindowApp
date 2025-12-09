@@ -1,5 +1,6 @@
 import React, {useContext} from "react";
-import { SafeAreaView, View, Text, Button, StyleSheet, Image, TouchableOpacity, ImageSourcePropType, Pressable } from "react-native";
+import { View, Text, Button, StyleSheet, Image, TouchableOpacity, ImageSourcePropType, Pressable } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { ReportSVG, MedicationSVGs, HealthDataSVG, MedicationTrackerSVG } from "@/assets/svgComponents/generalSVGs";
 import { AuthContext } from "@/context/AuthContext";

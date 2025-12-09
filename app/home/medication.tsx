@@ -1,7 +1,8 @@
 // Medication.tsx (updated)
 import MedicationTab from '@/components/MedicationTab';
-import React, { useContext, useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, Modal, Button, ScrollView, SafeAreaView, Alert, Pressable, TouchableOpacity, ActivityIndicator } from 'react-native';
+import React, { useContext, useEffect, useState } from 'react';
+import { View, Text, StyleSheet, Alert, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { SafeAreaView } from "react-native-safe-area-context";
 import { ExpandableCalendar, CalendarProvider, AgendaList } from 'react-native-calendars';
 import MedicationModal from '../../components/MedicationModal';
 import {DateFormat} from '@/util/DateTimeFormet';

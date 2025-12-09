@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useContext } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, SafeAreaView, TextInput } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, TextInput } from 'react-native';
+import { SafeAreaView } from "react-native-safe-area-context";
 import MedicationModal from '../../components/MedicationModal';
 import { FormatTimeDisplay } from '@/util/DateTimeFormet';
 import useApi from '@/CustomHooks/useCallAPI';

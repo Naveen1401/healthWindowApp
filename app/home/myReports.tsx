@@ -1,4 +1,5 @@
-import { Text, SafeAreaView, StyleSheet, TextInput, Alert, ScrollView, View, TouchableOpacity } from 'react-native'
+import { Text, StyleSheet, TextInput, Alert, ScrollView, View, TouchableOpacity } from 'react-native'
+import { SafeAreaView } from "react-native-safe-area-context";
 import React, { useCallback, useContext, useEffect, useState } from 'react'
 import GlobalStyleSheet from '../globalStyle'
 import ReportListItem from '@/components/ReportListItem'

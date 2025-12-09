@@ -1,11 +1,14 @@
 import React, { createContext, useEffect, useState, ReactNode } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
 
 export interface User {
   id: string;
   name: string;
   email: string;
   imageURL: string;
+  phoneNo: string;
 }
 
 interface AuthContextType {
@@ -17,6 +20,7 @@ interface AuthContextType {
   setAuthData: (user: User, access: string, refresh: string) => Promise<void>;
   refreshAccessToken: () => Promise<string | null>;
   logout: () => Promise<void>;
+  setUserData: (firstName: string, lastName: string, phoneNumber: string) => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType>({} as AuthContextType);
@@ -26,6 +30,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   const isLoggedIn = !!accessToken && !!user;
 
@@ -51,6 +56,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     loadStoredData();
   }, []);
 
+  const setUserData = async (
+    firstName: string,
+    lastName: string,
+    phoneNumber: string
+  ) => {
+    try {
+      if (!user) return; // If no user logged in, do nothing
+
+      // Create updated user object
+      const updatedUser: User = {
+        ...user,
+        name: `${firstName} ${lastName}`,
+        phoneNo: phoneNumber,
+      };
+
+      // Save to AsyncStorage
+      await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
+
+      // Update state
+      setUser(updatedUser);
+
+      console.log("Updated user: ", updatedUser);
+    } catch (err) {
+      console.log("Error updating user data:", err);
+    }
+  };
+
+
   const setAuthData = async (user: User, access: string, refresh: string) => {
     try {
       await AsyncStorage.setItem("user", JSON.stringify(user));
@@ -60,6 +93,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(user);
       setAccessToken(access);
       setRefreshToken(refresh);
+
+      router.replace('/home');
 
       console.log("User: ", user);
       console.log('refresh : ', refresh),
@@ -94,6 +129,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       await AsyncStorage.setItem("accessToken", responce?.data?.accessToken);
       setAccessToken(responce?.data?.accessToken);
+      setRefreshToken(responce?.data?.refreshToken);
 
       return responce?.data?.accessToken;
     } catch (err) {
@@ -104,9 +140,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = async () => {
     await AsyncStorage.multiRemove(["user", "accessToken", "refreshToken"]);
-    setUser(null);
-    setAccessToken(null);
-    setRefreshToken(null);
+    try {
+      await GoogleSignin.signOut();
+      setUser(null);
+      setAccessToken(null);
+      setRefreshToken(null);
+      router.replace('/auth');
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
@@ -120,6 +162,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setAuthData,
         refreshAccessToken,
         logout,
+        setUserData
       }}
     >
       {children}

@@ -1,6 +1,5 @@
-import { SafeAreaView,Text, Modal, Pressable, StyleSheet, View, Button } from 'react-native';
-import React, { useContext, useState } from 'react';
-import { AuthContext } from '@/context/AuthContext';
+import { Text, Modal, Pressable, StyleSheet, View, Button } from 'react-native';
+import React, { useState } from 'react';
 
 interface Report {
     id: number;
@@ -45,7 +44,7 @@ const ReportListItem:React.FC<ReportListItemProps> = ({report, handleDelete, han
     };
 
     return (
-        <SafeAreaView>
+        <View>
             <View style={style.reportTab}>
                 <Pressable
                     onPress={() => handleView(report)}
@@ -71,7 +70,7 @@ const ReportListItem:React.FC<ReportListItemProps> = ({report, handleDelete, han
                     </View>
                 </View>
             </Modal>
-        </SafeAreaView>
+        </View>
     );
 };
 const style = StyleSheet.create({

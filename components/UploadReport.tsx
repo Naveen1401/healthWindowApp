@@ -1,9 +1,8 @@
 import React, { useContext, useState } from 'react';
-import { View,SafeAreaView, Text, Button, TextInput, Alert, Platform, StyleSheet, Pressable, processColor } from 'react-native';
+import { View, Text, Button, TextInput, Alert, Platform, StyleSheet, Pressable, processColor } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import { AuthContext } from '@/context/AuthContext';
 import DatePicker from 'react-native-date-picker'
-import GlobalStyleSheet from '@/app/globalStyle';
 import useApi from '@/CustomHooks/useCallAPI';
 
 interface ReportType {
@@ -103,7 +102,7 @@ const UploadReport = (props : {handleUploadSuccess : (report:ReportType)=>void})
     };
 
     return (
-        <SafeAreaView style = {style.uploadReportMainContainer}>
+        <View style = {style.uploadReportMainContainer}>
             <View>
                 <Pressable style={style.uploadWidgetContainer} onPress={pickDocument}>
                     {!selectedFile?<Text>^ Select Report</Text>:
@@ -139,7 +138,7 @@ const UploadReport = (props : {handleUploadSuccess : (report:ReportType)=>void})
             <View style={style.uploadBtn}>
                 <Button color="white" title="Upload" onPress={uploadData} />
             </View>
-        </SafeAreaView>
+        </View>
     );
 };
 
