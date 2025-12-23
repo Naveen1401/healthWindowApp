@@ -1,6 +1,8 @@
 import DropdownComponent from "@/components/DropDownComponent";
+import useKeyboardHeight from "@/CustomHooks/useKeyboardHeight";
 import { useState } from "react";
-import { Alert, Button, Modal, StyleSheet, Text, TextInput, View } from "react-native";
+import { Alert, Modal, StyleSheet, Text, TextInput, View, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView, Platform } from "react-native";
+import Button from "@/components/Button";
 
 interface GlucoseType {
     glucose: number;
@@ -16,6 +18,7 @@ const AddGlucose = (props: {
     const { visible, setVisible, onSave } = props;
     const [healthRecord, setHealthRecord] = useState<Partial<GlucoseType>>({});
     const [selectedDropDownValue, setSelectedDropDownValue] = useState<string | null>(null);
+    const keyboardHeight = useKeyboardHeight();
 
     const handleChange = (field: keyof GlucoseType, value: string) => {
         setHealthRecord((prev) => ({
@@ -39,7 +42,7 @@ const AddGlucose = (props: {
     const handleSave = () => {
         if (
             !healthRecord.glucose ||
-            isNaN(healthRecord.glucose) ||
+            isNaN(healthRecord.glucose) || healthRecord.glucose<0 ||
             !selectedDropDownValue ||
             selectedDropDownValue === ""
         ) {
@@ -52,44 +55,55 @@ const AddGlucose = (props: {
     };
 
     return (
-        <View style={styles.container}>
+        // <View style={styles.container}>
             <Modal
                 visible={visible}
                 animationType="slide"
                 transparent={true}
                 onRequestClose={handleClose}
             >
-                <View style={styles.modalOverlay}>
-                    <View style={styles.modalContent}>
-                        <Text style={styles.title}>Add Glucose Data</Text>
-                        <Text style={styles.label}>Glucose</Text>
-                        <TextInput
-                            onChangeText={(text) => handleChange("glucose", text)}
-                            style={styles.input}
-                            keyboardType="numeric"
-                            placeholder="Glucose (e.g. 140mg/dL)"
-                        />
-                        <Text style={styles.label}>Meal Information</Text>
-                        <DropdownComponent
-                            data={data}
-                            value={selectedDropDownValue}
-                            setValue={setSelectedDropDownValue}
-                            placeholder={"Meal Info"}
-                        />
-                        {/* <TextInput
-                            onChangeText={(text) => handleChange("insulin_units", text)}
-                            style={styles.input}
-                            keyboardType="numeric"
-                            placeholder="Insulin units (e.g. 0.2)"
-                        /> */}
-                        <View style={styles.buttonContainer}>
-                            <Button title="Save" onPress={handleSave} />
-                            <Button title="Cancel" color="grey" onPress={handleClose} />
-                        </View>
+                <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                    <View style={[styles.modalOverlay, Platform.OS === 'android' && {
+                        paddingBottom: keyboardHeight > 0 ? keyboardHeight : 0
+                    }]}>
+                        <KeyboardAvoidingView
+                            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                            style={styles.keyboardAvoidingView}
+                        >
+
+                            <View style={styles.modalContent}>
+                                <Text style={styles.title}>Add Glucose Data</Text>
+                                <Text style={styles.label}>Glucose</Text>
+                                <TextInput
+                                    onChangeText={(text) => handleChange("glucose", text)}
+                                    style={styles.input}
+                                    keyboardType="numeric"
+                                    placeholder="Glucose (e.g. 140mg/dL)"
+                                    placeholderTextColor="#999" 
+                                />
+                                <Text style={styles.label}>Meal Information</Text>
+                                <DropdownComponent
+                                    data={data}
+                                    value={selectedDropDownValue}
+                                    setValue={setSelectedDropDownValue}
+                                    placeholder={"Meal Info"}
+                                />
+                                {/* <TextInput
+                                    onChangeText={(text) => handleChange("insulin_units", text)}
+                                    style={styles.input}
+                                    keyboardType="numeric"
+                                    placeholder="Insulin units (e.g. 0.2)"
+                                /> */}
+                                <View style={styles.buttonContainer}>
+                                    <Button size="small" variant="danger-inverted" title="Cancel"  onPress={handleClose} />
+                                    <Button size="small" variant="primary-inverted" title="Save" onPress={handleSave} />
+                                </View>
+                            </View>
+                        </KeyboardAvoidingView>
                     </View>
-                </View>
+                </TouchableWithoutFeedback>
             </Modal>
-        </View>
+        // </View>
     );
 };
 
@@ -126,6 +140,7 @@ const styles = StyleSheet.create({
     input: {
         borderWidth: 1,
         borderColor: "#ccc",
+        color: '#000',
         padding: 10,
         borderRadius: 8,
         marginBottom: 12,
@@ -134,5 +149,9 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: "600",
         marginBottom: 5,
+    },
+    keyboardAvoidingView: {
+        flex: 1,
+        justifyContent: 'center',
     },
 });

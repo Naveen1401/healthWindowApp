@@ -38,14 +38,14 @@ export default function AuthScreen() {
     //     webClientId: process.env.EXPO_PUBLIC_WEB_CLIENT_ID
     // };
 
-    const { setAuthData } = useContext(AuthContext);
+    const { logout,setAuthData } = useContext(AuthContext);
 
     // const [request, response, promptAsync] = Google.useAuthRequest(config);
 
 
     const handleUserSign = async (user: any) => {
         try {
-            console.log(process.env.EXPO_PUBLIC_BACKEND_SERVER);
+            // Alert.alert('Backend URL', process.env.EXPO_PUBLIC_BACKEND_SERVER);
             const backendUser = {
                 "email": user.email,
                 "family_name": user.familyName,
@@ -61,19 +61,23 @@ export default function AuthScreen() {
             });
             const apiresponse = await response.json();
 
+            console.log("API responce ", apiresponse);
+            
+
             if(apiresponse.status === 200){
                 setAuthData(
                     { 
                         id: apiresponse?.data?.createdPatient?.id.toString(),
-                        name: user.given_name+" "+user.family_name,
+                        name: apiresponse?.data?.createdPatient?.first_name + " " + apiresponse?.data?.createdPatient?.last_name,
                         email: user.email,
-                        imageURL: user.picture,
+                        imageURL: apiresponse?.data?.createdPatient?.image_url,
                         phoneNo: apiresponse?.data?.createdPatient?.phone_no
                     },
                     apiresponse?.data?.accessToken,
                     apiresponse?.data?.refreshToken
                 )
             }else{
+                logout();
                 Alert.alert("Error",apiresponse.error);
             }
         } catch (error) {
@@ -86,7 +90,7 @@ export default function AuthScreen() {
             await GoogleSignin.hasPlayServices();
             const response = await GoogleSignin.signIn();
             if (isSuccessResponse(response)) {
-                console.log(response.data.user)
+                // Alert.alert('Google login done');
                 handleUserSign(response.data.user);
             } else {
                 // sign in was cancelled by user
@@ -145,36 +149,56 @@ export default function AuthScreen() {
     }
 
     return (
-        <SafeAreaView>
-            <View style={{ height: "30%", justifyContent: "flex-end", alignItems: "center" }}>
-                <Text style={style.headerText}>Health</Text>
-                <Text style={style.headerText}>Window</Text>
+        <SafeAreaView style={style.container}>
+            <View style={style.svgContainer}>
+                <HomeSVG height={"60%"} />
             </View>
-            <HomeSVG height={"50%"} />
-            <TouchableOpacity style={style.signInButton} onPress={handleGoogleSignIn}>
-                <GoogleSVG style={{ marginRight: 20 }} height={20} width={20} />
-                <Text>SignIn With Google</Text>
-            </TouchableOpacity>
+            <View style={style.textContainer}>
+                <View style={{marginBottom: 20}}>
+                    <Text style={{ fontSize: 20, color: "#fff", }}>Wellcome to</Text>
+                    <Text style={style.headerText}>WellCurely</Text>
+                </View>
+                <TouchableOpacity style={style.signInButton} onPress={handleGoogleSignIn}>
+                    <GoogleSVG style={{ marginRight: 20 }} height={20} width={20} />
+                    <Text>SignIn With Google</Text>
+                </TouchableOpacity>
+            </View>
         </SafeAreaView>
     )
 }
 
 const style = StyleSheet.create({
+    container:{
+        flex: 1,
+        backgroundColor: '#d1e3ff',
+        padding: 16,
+    },
+    svgContainer: {
+        height: '60%',
+        justifyContent: 'center',
+    },
+    textContainer:{
+        height: '30%',
+        justifyContent: 'center', 
+        backgroundColor: '#0064f7',
+        borderRadius: 16,
+        padding: 20,
+        // alignItems: 'center'
+    },
     signInButton: {
         backgroundColor: "#fff",
-        marginHorizontal: 20,
         borderRadius: 10,
         padding: 15,
         flexDirection: "row",
         justifyContent: "center",
         alignItems: "center",
         borderColor: "#e3e3e3",
-        borderWidth: 2
+        borderWidth: 2,
+        width:'100%'
     },
     headerText: {
-        textAlign: "center",
-        fontSize: 50,
-        color: "#CA515B",
+        fontSize: 35,
+        color: "#fff",
         fontFamily: 'Poppins_600SemiBold'
     }
 })

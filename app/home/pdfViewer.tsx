@@ -1,49 +1,31 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, ActivityIndicator, Text } from 'react-native';
-import { WebView } from 'react-native-webview';
-import { useLocalSearchParams } from 'expo-router';
+import React from 'react';
+import { View, StyleSheet, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Pdf from 'react-native-pdf';
+import { useLocalSearchParams, router } from 'expo-router';
 
 const ReportViewerScreen = () => {
     const { url } = useLocalSearchParams<{ url: string }>();
-    const decodedUrl = decodeURIComponent(url);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const decodedUrl = decodeURIComponent(url || '');
 
     return (
         <SafeAreaView style={styles.container}>
-            {isLoading && (
-                <View style={styles.loadingContainer}>
-                    <ActivityIndicator size="large" />
-                    <Text style={styles.loadingText}>Loading report...</Text>
-                </View>
-            )}
-
-            {error && (
-                <View style={styles.errorContainer}>
-                    <Text style={styles.errorText}>{error}</Text>
-                </View>
-            )}
-
-            <WebView
-                source={{ uri: decodedUrl }}
-                style={[styles.webview, isLoading && { height: 0 }]}
-                startInLoadingState={false}
-                onLoadStart={() => {
-                    setIsLoading(true);
-                    setError(null);
+            <Pdf
+                source={{ uri: decodedUrl, cache: true }}
+                style={styles.pdf}
+                trustAllCerts={false}
+                onLoadComplete={(numberOfPages, filePath) => {
+                    console.log(`Number of pages: ${numberOfPages}`);
                 }}
-                onLoadEnd={() => setIsLoading(false)}
-                onError={(syntheticEvent) => {
-                    const { nativeEvent } = syntheticEvent;
-                    setError(`Failed to load report: ${nativeEvent.description}`);
-                    setIsLoading(false);
+                onPageChanged={(page, numberOfPages) => {
+                    console.log(`Current page: ${page}`);
                 }}
-                renderError={(errorName) => (
-                    <View style={styles.errorContainer}>
-                        <Text style={styles.errorText}>Error: {errorName}</Text>
-                    </View>
-                )}
+                onError={(error) => {
+                    console.log(error);
+                }}
+                onPressLink={(uri) => {
+                    console.log(`Link pressed: ${uri}`);
+                }}
             />
         </SafeAreaView>
     );
@@ -52,32 +34,14 @@ const ReportViewerScreen = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        justifyContent: 'flex-start',
+        alignItems: 'center',
+        backgroundColor: '#fff',
     },
-    webview: {
+    pdf: {
         flex: 1,
-    },
-    loadingContainer: {
-        ...StyleSheet.absoluteFillObject,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'white',
-    },
-    loadingText: {
-        marginTop: 10,
-        fontSize: 16,
-        color: '#666',
-    },
-    errorContainer: {
-        ...StyleSheet.absoluteFillObject,
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: 20,
-        backgroundColor: 'white',
-    },
-    errorText: {
-        color: 'red',
-        fontSize: 16,
-        textAlign: 'center',
+        width: Dimensions.get('window').width,
+        height: Dimensions.get('window').height,
     },
 });
 

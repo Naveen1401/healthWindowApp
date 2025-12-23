@@ -1,9 +1,15 @@
 // MedicationModal.tsx
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, Platform, Alert, Button, Modal } from 'react-native';
+import {
+    View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, Platform, Alert, Modal, KeyboardAvoidingView,
+    Keyboard,
+    TouchableWithoutFeedback 
+ } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Calendar, DateData } from 'react-native-calendars';
-import {DateFormat} from '@/util/DateTimeFormet';
+import { DateFormat } from '@/util/DateTimeFormet';
+import useKeyboardHeight from '@/CustomHooks/useKeyboardHeight';
+import Button from './Button';
 
 interface Medicine {
     id?: number;
@@ -42,6 +48,7 @@ const MedicationModal: React.FC<MedicationModalProps> = ({
     const [tempTime, setTempTime] = useState<Date>(new Date());
     const [showCalendar, setShowCalendar] = useState(false);
     const modelScrollRef = useRef<ScrollView>(null);
+    const keyboardHeight = useKeyboardHeight();
 
     const [medicine, setMedicine] = useState<Medicine>(initialData);
     const [selectedDates, setSelectedDates] = useState({
@@ -59,14 +66,12 @@ const MedicationModal: React.FC<MedicationModalProps> = ({
         }
     }, [visible]);
 
-
     const handleChange = (field: keyof Medicine, value: string) => {
         setMedicine(prev => ({ ...prev, [field]: value }));
     };
 
     // Date range selection handler
     const handleDayPress = (day: DateData) => {
-
         if (isEditMode) {
             if (new Date(day.dateString) < new Date()) {
                 Alert.alert('Error', 'End date cannot be before today');
@@ -117,22 +122,41 @@ const MedicationModal: React.FC<MedicationModalProps> = ({
             newDate.setHours(parseInt(hours, 10));
             newDate.setMinutes(parseInt(minutes, 10));
             setTempTime(newDate);
+        } else {
+            setTempTime(new Date());
         }
         setCurrentTimeIndex(index);
         setTimePickerVisible(true);
     };
 
-    const handleTimeChange = (index: number, timeString: string) => {
-        const updatedTimes = [...medicine.intake_time_list];
-        updatedTimes[index] = timeString;
-        setMedicine(prev => ({ ...prev, intake_time_list: updatedTimes }));
+    // Handle Android time picker change
+    const handleAndroidTimeChange = (event: any, date?: Date) => {
+        setTimePickerVisible(false);
+
+        // Handle cancel
+        if (event.type === 'dismissed') {
+            setCurrentTimeIndex(null);
+            return;
+        }
+
+        // Handle time selected
+        if (date && currentTimeIndex !== null) {
+            const timeString = date.toTimeString().substring(0, 8);
+            const updatedTimes = [...medicine.intake_time_list];
+            updatedTimes[currentTimeIndex] = timeString;
+            setMedicine(prev => ({ ...prev, intake_time_list: updatedTimes }));
+        }
+        setCurrentTimeIndex(null);
     };
 
+    // Handle iOS time picker confirmation
     const handleTimeConfirm = () => {
         setTimePickerVisible(false);
         if (currentTimeIndex !== null) {
             const timeString = tempTime.toTimeString().substring(0, 8);
-            handleTimeChange(currentTimeIndex, timeString);
+            const updatedTimes = [...medicine.intake_time_list];
+            updatedTimes[currentTimeIndex] = timeString;
+            setMedicine(prev => ({ ...prev, intake_time_list: updatedTimes }));
         }
         setCurrentTimeIndex(null);
     };
@@ -154,6 +178,18 @@ const MedicationModal: React.FC<MedicationModalProps> = ({
         onSave(medicine);
         onClose();
     };
+
+    const handleCalendarClose = () => {
+        if (selectedDates.startDate.trim() === '') {
+            Alert.alert('Error', 'Please select a start date');
+            return;
+        }
+        if (selectedDates.endDate.trim() === '') {
+            Alert.alert('Error', 'Please select an end date');
+            return;
+        }
+        setShowCalendar(false);
+    }
 
     // Calendar marked dates configuration
     const markedDates: { [date: string]: any } = {};
@@ -188,21 +224,6 @@ const MedicationModal: React.FC<MedicationModalProps> = ({
         }
     }
 
-    const handleCalendarClose = () => {
-        if (selectedDates.startDate.trim() === '') {
-            Alert.alert('Error', 'Please select an start date');
-            return;
-        }
-        if (selectedDates.endDate.trim() === '') {
-            Alert.alert('Error', 'Please select an end date');
-            return;
-        }
-
-
-        setShowCalendar(false);
-    }
-
-
     return (
         <Modal
             animationType="slide"
@@ -210,141 +231,165 @@ const MedicationModal: React.FC<MedicationModalProps> = ({
             visible={visible}
             onRequestClose={onClose}
         >
-            <View style={styles.modalOverlay}>
-                <View style={styles.modalContent}>
-                    <ScrollView ref={modelScrollRef} onContentSizeChange={() => modelScrollRef.current?.scrollToEnd({ animated: true })}>
-                        <Text style={styles.title}>{isEditMode ? 'Edit Medication' : 'Add Medication'}</Text>
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                <View style={[styles.modalOverlay, Platform.OS === 'android' && {
+                    paddingBottom: keyboardHeight > 0 ? keyboardHeight : 0
+                }]}>
+                    {/* <KeyboardAvoidingView
+                        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                        style={styles.keyboardAvoidingView}
+                    > */}
+                        <View style={styles.modalContent}>
+                            <ScrollView ref={modelScrollRef} onContentSizeChange={() => modelScrollRef.current?.scrollToEnd({ animated: true })}>
+                                <Text style={styles.title}>{isEditMode ? 'Edit Medication' : 'Add Medication'}</Text>
 
-                        {/* Medicine Name */}
-                        <TextInput
-                            placeholder="Medicine Name"
-                            style={[styles.input, isEditMode && styles.disabledInput]}
-                            value={medicine.medicine_name}
-                            onChangeText={(text) => handleChange('medicine_name', text)}
-                            editable={!isEditMode}
-                        />
-
-                        {/* Description */}
-                        <TextInput
-                            placeholder="Description"
-                            style={[styles.input, isEditMode && styles.disabledInput]}
-                            value={medicine.description}
-                            onChangeText={(text) => handleChange('description', text)}
-                            editable={!isEditMode}
-                        />
-
-                        {/* Dosage */}
-                        <TextInput
-                            placeholder="Dosage (e.g. 1 tab - 250 mg)"
-                            style={[styles.input, isEditMode && styles.disabledInput]}
-                            value={medicine.dosage}
-                            onChangeText={(text) => handleChange('dosage', text)}
-                            editable={!isEditMode}
-                        />
-
-                        {/* Date Range Picker */}
-                        <Text style={styles.label}>Medication Period</Text>
-                        <TouchableOpacity
-                            style={styles.input}
-                            onPress={() => setShowCalendar(true)}
-                        >
-                            <Text>
-                                {selectedDates.startDate
-                                    ? `${formatDate(selectedDates.startDate)} - ${selectedDates.endDate ? formatDate(selectedDates.endDate) : 'Select end date'}`
-                                    : 'Select date range'}
-                            </Text>
-                        </TouchableOpacity>
-
-                        {showCalendar && (
-                            <View style={styles.calendarContainer}>
-                                <Calendar
-                                    current={selectedDates.startDate || DateFormat(new Date())}
-                                    minDate={isEditMode ? selectedDates.startDate : DateFormat(new Date())}
-                                    onDayPress={handleDayPress}
-                                    markingType="period"
-                                    markedDates={markedDates}
-                                    theme={{
-                                        backgroundColor: '#ffffff',
-                                        calendarBackground: '#ffffff',
-                                        selectedDayBackgroundColor: '#50cebb',
-                                        selectedDayTextColor: '#ffffff',
-                                        todayTextColor: '#50cebb',
-                                        arrowColor: '#50cebb',
-                                        textDisabledColor: '#d9d9d9'
-                                    }}
+                                {/* Medicine Name */}
+                                <TextInput
+                                    placeholder="Medicine Name"
+                                    placeholderTextColor="#999" 
+                                    style={[styles.input, isEditMode && styles.disabledInput]}
+                                    value={medicine.medicine_name}
+                                    onChangeText={(text) => handleChange('medicine_name', text)}
+                                    editable={!isEditMode}
                                 />
-                                <Button title="Done" onPress={handleCalendarClose} />
-                            </View>
-                        )}
 
-                        {/* Intake Times */}
-                        <Text style={styles.label}>Intake Times</Text>
-                        {medicine.intake_time_list.map((time, index) => (
-                            <View key={index} style={styles.timeInputContainer}>
+                                {/* Description */}
+                                <TextInput
+                                    placeholder="Description"
+                                    placeholderTextColor="#999" 
+                                    style={[styles.input, isEditMode && styles.disabledInput]}
+                                    value={medicine.description}
+                                    onChangeText={(text) => handleChange('description', text)}
+                                    editable={!isEditMode}
+                                />
+
+                                {/* Dosage */}
+                                <TextInput
+                                    placeholder="Dosage (e.g. 1 tab - 250 mg)"
+                                    placeholderTextColor="#999" 
+                                    style={[styles.input, isEditMode && styles.disabledInput]}
+                                    value={medicine.dosage}
+                                    onChangeText={(text) => handleChange('dosage', text)}
+                                    editable={!isEditMode}
+                                />
+
+                                {/* Date Range Picker */}
+                                <Text style={styles.label}>Medication Period</Text>
                                 <TouchableOpacity
-                                    style={styles.timeInput}
-                                    onPress={() => showTimePicker(index)}
+                                    style={styles.input}
+                                    onPress={() => setShowCalendar(true)}
                                 >
-                                    <Text>{time ? formatTime(time) : 'Select time'}</Text>
+                                    <Text>
+                                        {selectedDates.startDate
+                                            ? `${formatDate(selectedDates.startDate)} - ${selectedDates.endDate ? formatDate(selectedDates.endDate) : 'Select end date'}`
+                                            : 'Select date range'}
+                                    </Text>
                                 </TouchableOpacity>
-                                {medicine.intake_time_list.length > 1 && (
-                                    <TouchableOpacity
-                                        style={styles.removeButton}
-                                        onPress={() => {
-                                            const updatedTimes = [...medicine.intake_time_list];
-                                            updatedTimes.splice(index, 1);
-                                            setMedicine(prev => ({ ...prev, intake_time_list: updatedTimes }));
-                                        }}
-                                    >
-                                        <Text style={styles.removeButtonText}>×</Text>
-                                    </TouchableOpacity>
+
+                                {showCalendar && (
+                                    <View style={styles.calendarContainer}>
+                                        <Calendar
+                                            current={selectedDates.startDate || DateFormat(new Date())}
+                                            minDate={isEditMode ? selectedDates.startDate : DateFormat(new Date())}
+                                            onDayPress={handleDayPress}
+                                            markingType="period"
+                                            markedDates={markedDates}
+                                            theme={{
+                                                backgroundColor: '#ffffff',
+                                                calendarBackground: '#ffffff',
+                                                selectedDayBackgroundColor: '#50cebb',
+                                                selectedDayTextColor: '#ffffff',
+                                                todayTextColor: '#50cebb',
+                                                arrowColor: '#50cebb',
+                                                textDisabledColor: '#d9d9d9'
+                                            }}
+                                        />
+                                        <Button variant='primary' title="Done" onPress={handleCalendarClose} />
+                                    </View>
                                 )}
-                            </View>
-                        ))}
 
-                        {/* Time Picker */}
-                        {timePickerVisible && (
-                            <View style={styles.timePickerContainer}>
-                                <DateTimePicker
-                                    value={tempTime}
-                                    mode="time"
-                                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                                    onChange={(event, date) => {
-                                        if (date) {
-                                            setTempTime(date);
-                                        }
+                                {/* Intake Times */}
+                                <Text style={styles.label}>Intake Times</Text>
+                                {medicine.intake_time_list.map((time, index) => (
+                                    <View key={index} style={styles.timeInputContainer}>
+                                        <TouchableOpacity
+                                            style={styles.timeInput}
+                                            onPress={() => showTimePicker(index)}
+                                        >
+                                            <Text>{time ? formatTime(time) : 'Select time'}</Text>
+                                        </TouchableOpacity>
+                                        {medicine.intake_time_list.length > 1 && (
+                                            <TouchableOpacity
+                                                style={styles.removeButton}
+                                                onPress={() => {
+                                                    const updatedTimes = [...medicine.intake_time_list];
+                                                    updatedTimes.splice(index, 1);
+                                                    setMedicine(prev => ({ ...prev, intake_time_list: updatedTimes }));
+                                                }}
+                                            >
+                                                <Text style={styles.removeButtonText}>×</Text>
+                                            </TouchableOpacity>
+                                        )}
+                                    </View>
+                                ))}
+
+                                {/* Time Picker - Different handling for iOS and Android */}
+                                {timePickerVisible && Platform.OS === 'ios' && (
+                                    <View style={styles.timePickerContainer}>
+                                        <DateTimePicker
+                                            value={tempTime}
+                                            mode="time"
+                                            display="spinner"
+                                            onChange={(event, date) => {
+                                                if (date) {
+                                                    setTempTime(date);
+                                                }
+                                            }}
+                                            is24Hour={false}
+                                            minuteInterval={30}
+                                        />
+                                        <View style={styles.timePickerButtons}>
+                                            <Button variant='danger-inverted' title="Cancel" onPress={() => setTimePickerVisible(false)} />
+                                            <Button variant='primary-inverted' title="OK" onPress={handleTimeConfirm} />
+                                        </View>
+                                    </View>
+                                )}
+
+                                {/* Android Time Picker - This needs to be separate */}
+                                {timePickerVisible && Platform.OS === 'android' && (
+                                    <DateTimePicker
+                                        value={tempTime}
+                                        mode="time"
+                                        display="default"
+                                        onChange={handleAndroidTimeChange}
+                                        is24Hour={false}
+                                        minuteInterval={30}
+                                    />
+                                )}
+
+                                {/* Add Time Button */}
+                                <TouchableOpacity
+                                    style={styles.addButton}
+                                    onPress={() => {
+                                        setMedicine(prev => ({
+                                            ...prev,
+                                            intake_time_list: [...prev.intake_time_list, '']
+                                        }));
                                     }}
-                                    is24Hour={false}
-                                    minuteInterval={30}
-                                />
-                                <View style={styles.timePickerButtons}>
-                                    <Button title="Cancel" onPress={() => setTimePickerVisible(false)} />
-                                    <Button title="OK" onPress={handleTimeConfirm} />
+                                >
+                                    <Text style={styles.addButtonText}>+ Add Time</Text>
+                                </TouchableOpacity>
+
+                                {/* Form Buttons */}
+                                <View style={styles.buttonContainer}>
+                                    <Button title="Cancel" variant='danger-inverted' onPress={onClose} />
+                                    <Button title="Save" variant='primary-inverted' onPress={handleSave} />
                                 </View>
-                            </View>
-                        )}
-
-                        {/* Add Time Button */}
-                        <TouchableOpacity
-                            style={styles.addButton}
-                            onPress={() => {
-                                setMedicine(prev => ({
-                                    ...prev,
-                                    intake_time_list: [...prev.intake_time_list, '']
-                                }));
-                            }}
-                        >
-                            <Text style={styles.addButtonText}>+ Add Time</Text>
-                        </TouchableOpacity>
-
-                        {/* Form Buttons */}
-                        <View style={styles.buttonContainer}>
-                            <Button title="Save" onPress={handleSave} />
-                            <Button title="Cancel" color="grey" onPress={onClose} />
+                            </ScrollView>
                         </View>
-                    </ScrollView>
+                    {/* </KeyboardAvoidingView> */}
                 </View>
-            </View>
+            </TouchableWithoutFeedback>
         </Modal>
     );
 };
@@ -379,7 +424,7 @@ const styles = StyleSheet.create({
         padding: 20,
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
-        maxHeight: '80%',
+        maxHeight: '90%',
     },
     title: {
         fontSize: 18,
@@ -461,6 +506,10 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         marginTop: 10,
+    },
+    keyboardAvoidingView: {
+        flex: 1,
+        justifyContent: 'flex-end',
     },
 });
 

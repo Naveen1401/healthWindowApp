@@ -1,20 +1,11 @@
 import React, { useContext, useState } from 'react';
-import { View, Text, Button, TextInput, Alert, Platform, StyleSheet, Pressable, processColor } from 'react-native';
+import { View, Text, TextInput, Alert, Platform, StyleSheet, Pressable, processColor } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import { AuthContext } from '@/context/AuthContext';
 import DatePicker from 'react-native-date-picker'
 import useApi from '@/CustomHooks/useCallAPI';
-
-interface ReportType {
-    id: number,
-    patientId: number,
-    reportName: string,
-    fileExtension: string,
-    reportDate: string,
-    createdAt: string,
-    updatedAt: string,
-    deleted: boolean
-}
+import { ReportType } from '@/util/type';
+import Button from './Button';
 
 const UploadReport = (props : {handleUploadSuccess : (report:ReportType)=>void}) => {
     const {handleUploadSuccess} = props
@@ -108,18 +99,19 @@ const UploadReport = (props : {handleUploadSuccess : (report:ReportType)=>void})
                     {!selectedFile?<Text>^ Select Report</Text>:
                     <View style={style.selectedFileView}>
                         <Text>{selectedFile.name}</Text>
-                        <Button title="x" onPress={()=>(setSelectedFile(null))}/>
+                        <Button variant='danger-inverted' size='small' title="x" onPress={()=>(setSelectedFile(null))}/>
                     </View>}
                 </Pressable>
                 <TextInput
                     value={reportName}
                     onChangeText={setReportName}
                     placeholder="Enter report name"
+                    placeholderTextColor="#999" 
                     style={style.reportNameInput}
                 />
             </View>
             <View >
-                <Button title={`Report Date: ${selectedDate.toLocaleDateString()}`} onPress={() => setOpen(true)} />
+                <Button variant='primary-inverted' title={`Report Date: ${selectedDate.toLocaleDateString()}`} onPress={() => setOpen(true)} />
                 <DatePicker
                     modal
                     open={open}
@@ -136,7 +128,7 @@ const UploadReport = (props : {handleUploadSuccess : (report:ReportType)=>void})
             </View>
 
             <View style={style.uploadBtn}>
-                <Button color="white" title="Upload" onPress={uploadData} />
+                <Button size='small' title="Upload" onPress={uploadData} />
             </View>
         </View>
     );
@@ -150,8 +142,7 @@ const style = StyleSheet.create({
     },
     uploadWidgetContainer:{
         paddingVertical: 30,
-        marginHorizontal: 20,
-        marginTop: 20,
+        margin: 20,
         borderRadius:10,
         borderWidth:2,
         borderColor:"gray",
@@ -164,7 +155,7 @@ const style = StyleSheet.create({
         borderWidth: 1,
         borderColor: 'gray',
         padding: 10,
-        margin: 20,
+        marginHorizontal: 20,
         borderRadius: 5,
         textAlign: "center"
     },

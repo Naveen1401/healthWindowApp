@@ -154,7 +154,7 @@ const HealthDataScreen = () => {
                 <HealthDataChart data={healthData} />
 
                 <AddDataComponent
-                    visible={visible}
+                    visible={visible}  
                     setVisible={setVisible}
                     onSave={addHealthData}
                 />

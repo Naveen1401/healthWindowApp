@@ -31,6 +31,12 @@
           <string>com.naveen1401.healthWindow</string>
         </array>
       </dict>
+      <dict>
+        <key>CFBundleURLSchemes</key>
+        <array>
+          <string>com.googleusercontent.apps.1043868080407-64pa57pemqo12aebhi93p8i59sb8dvh1</string>
+        </array>
+      </dict>
     </array>
     <key>CFBundleVersion</key>
     <string>1</string>

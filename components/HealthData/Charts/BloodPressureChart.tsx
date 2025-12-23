@@ -1,6 +1,6 @@
 import { isoConverter } from "@/util/DateTimeFormet";
-import { useMemo } from "react";
-import { View, Dimensions } from "react-native"
+import { useMemo, useState } from "react";
+import { View, Dimensions, StyleProp, ViewStyle } from "react-native"
 import { LineChart } from "react-native-gifted-charts";
 
 interface dataPoint {
@@ -8,9 +8,15 @@ interface dataPoint {
     label: string
 }
 
-const BloodPressureChart = (props:{data:any[]}) => {
-    const {data} = props;
-    const screenWidth = Dimensions.get("window").width;
+const BloodPressureChart = (props: { data: any[], height?:number }) => {
+    const { data, height } = props;
+    const [parentWidth, setParentWidth] = useState(Dimensions.get("window").width);
+
+
+    const handleWith = (event: any) => {
+        const { width} = event.nativeEvent.layout;
+        setParentWidth(width);
+    }
 
     const {systolicData, diastolicData, heartbeatData} = useMemo(()=>{
         const systolicData : dataPoint[]  = [];
@@ -30,17 +36,17 @@ const BloodPressureChart = (props:{data:any[]}) => {
     }, [data]);
 
     return (
-        <View style={{ backgroundColor: "#e0e0e0", paddingVertical:10, borderRadius: 10}}>
+        <View style={{ backgroundColor: "#fff", padding: 10, borderRadius: 10 }} onLayout={handleWith}>
             <LineChart
-                width={screenWidth}
+                width={parentWidth*0.9}
                 color1="#338a43"
                 color2="#4782ba"
                 color3="#b03c3c"
-                height={300}
+                height={height ?? 300}
                 data={systolicData}
                 data2={diastolicData}
                 data3={heartbeatData}
-                yAxisOffset={30}
+                yAxisOffset={10}
                 showReferenceLine1
                 referenceLine1Position={120}
                 referenceLine1Config={{ color: '#338a43' }}
@@ -57,8 +63,9 @@ const BloodPressureChart = (props:{data:any[]}) => {
                 yAxisTextStyle={
                     { fontSize: 10 }
                 }
-                // stepValue={10}
-                // noOfSections={15}
+                adjustToWidth
+                endSpacing={10}
+                scrollToEnd
             />
         </View>
     )

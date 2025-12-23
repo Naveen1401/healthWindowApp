@@ -1,15 +1,5 @@
 import { createContext, ReactNode, useState } from "react"
-
-interface ReportType {
-    id: number,
-    patientId: number,
-    reportName: string,
-    fileExtension: string,
-    reportDate: string,
-    createdAt: string,
-    updatedAt: string,
-    deleted: boolean
-}
+import { ReportType } from '@/util/type';
 
 interface ReportContextType {
     reportData: ReportType[] | null;

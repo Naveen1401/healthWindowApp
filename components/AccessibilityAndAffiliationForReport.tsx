@@ -3,14 +3,13 @@ import {
     Modal, 
     View, 
     StyleSheet, 
-    FlatList, 
-    Button,
-    Alert
+    FlatList,
 } from 'react-native';
 import React, { useContext, useState } from 'react';
 import SelectionBox from './SelectionBox';
 import useApi from '@/CustomHooks/useCallAPI';
 import { AuthContext } from '@/context/AuthContext';
+import Button from './Button';
 
 
 type AccessibilityAndAffiliationForReportProps = {
@@ -106,7 +105,7 @@ const AccessibilityAndAffiliationForReport: React.FC<AccessibilityAndAffiliation
                     />
                     <View style={styles.activityContainer}>
                         <Button
-                            color="red"
+                            size='small' variant='danger-inverted'
                             title='Close'
                             onPress={() => {
                                 setOpenModel(false);
@@ -115,6 +114,7 @@ const AccessibilityAndAffiliationForReport: React.FC<AccessibilityAndAffiliation
                             disabled={isLoading}
                         />
                         <Button
+                            size='small' variant='primary-inverted'
                             title={isLoading ? 'Saving...' : 'Save'}
                             onPress={handleAffiliacation}
                             disabled={isLoading}

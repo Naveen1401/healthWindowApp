@@ -1,6 +1,7 @@
 import useApi from '@/CustomHooks/useCallAPI';
 import React from 'react';
-import { View, Text, Button, FlatList, StyleSheet, ScrollView, Alert } from 'react-native';
+import { View, Text, FlatList, StyleSheet, ScrollView, Alert } from 'react-native';
+import Button from '../Button';
 
 interface HealthDataListProps {
     data: any[];
@@ -39,6 +40,8 @@ const HealthDataList: React.FC<HealthDataListProps> = ({ data, type, onDelete })
                 </View>
                 <Button
                     title="Delete"
+                    variant='danger-inverted'
+                    size='small'
                     onPress={() => {
                         Alert.alert("Delele", "Are you sure", [
                             {

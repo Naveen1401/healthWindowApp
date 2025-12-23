@@ -10,17 +10,7 @@ import useApi from '@/CustomHooks/useCallAPI'
 import { AuthContext } from '@/context/AuthContext'
 import { router, useNavigation } from 'expo-router'
 import { BackSVG } from '@/assets/svgComponents/generalSVGs'
-
-interface ReportType {
-    id: number,
-    patientId: number,
-    reportName: string,
-    fileExtension: string,
-    reportDate: string,
-    createdAt: string,
-    updatedAt: string,
-    deleted: boolean
-}
+import { ReportType } from '@/util/type';
 
 const MyReports = () => {
     const { reportData, setReportData } = useContext(ReportDataContext);
@@ -71,25 +61,6 @@ const MyReports = () => {
         );
     };
 
-    const handleViewReport = async (report: ReportType) => {
-        const urlString = `${process.env.EXPO_PUBLIC_BACKEND_SERVER}/patient/s3UrlGenerator?key=reports/${user?.id}/${report.reportDate}/${report.reportName}.pdf`;
-
-        const request = await callApi({
-            url: urlString,
-            method: "GET",
-            headers: {
-            "Patient-Id": user?.id ?? "-1"
-            },
-        })
-
-        const presignedUrl = request.data;
-
-        router.push({
-            pathname: '/home/pdfViewer',
-            params: { url: encodeURIComponent(presignedUrl) },
-        });
-    }
-
     const handleSearch = useCallback((searchText: string) => {
         if (searchText.length === 0) {
             setFilteredReports(reportData || null);  // Handle undefined case
@@ -121,6 +92,7 @@ const MyReports = () => {
             </View>
             <TextInput
                 placeholder='Search report name...'
+                placeholderTextColor="#999" 
                 style={{ padding: 10, borderWidth: 1, borderColor: '#ccc', borderRadius: 5, marginVertical: 10, marginHorizontal: 20, backgroundColor: "white" }}
                 onChangeText= {(text)=>{handleSearch(text)}}
             />
@@ -129,8 +101,7 @@ const MyReports = () => {
                     <ReportListItem key={report.id}
                         report={report}
                         handleDelete={handleDelete}
-                        handleEdit={handleEdit}
-                        handleView={handleViewReport} />
+                        handleEdit={handleEdit}/>
                 )) : <Text style={{ textAlign: "center", fontWeight: "bold", fontSize: 16, color:"#424242", marginTop: 10}}>No reports available</Text>}
             </ScrollView>
             <AccessibilityAndAffiliationForReport doctors={doctorData || []} openModel={openModel} setOpenModel={setOpenModel} reportID={selectedReportID} />

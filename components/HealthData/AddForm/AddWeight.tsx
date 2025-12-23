@@ -1,5 +1,7 @@
+import useKeyboardHeight from "@/CustomHooks/useKeyboardHeight";
 import { useState } from "react";
-import { Alert, Button, Modal, StyleSheet, Text, TextInput, View } from "react-native";
+import { Alert, Modal, StyleSheet, Text, TextInput, View, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView, Platform } from "react-native";
+import Button from "@/components/Button";
 
 interface WeightType {
     weight_in_kgs: number;
@@ -13,6 +15,7 @@ interface Props {
 
 const AddWeight = ({ visible, setVisible, onSave }: Props) => {
     const [healthRecord, setHealthRecord] = useState<Partial<WeightType>>({});
+    const keyboardHeight = useKeyboardHeight();
 
     const handleChange = (field: keyof WeightType, value: string) => {
         setHealthRecord((prev) => ({
@@ -29,7 +32,7 @@ const AddWeight = ({ visible, setVisible, onSave }: Props) => {
     const handleSave = () => {
         const { weight_in_kgs } = healthRecord;
 
-        if (typeof weight_in_kgs !== "number" || isNaN(weight_in_kgs)) {
+        if (typeof weight_in_kgs !== "number" || isNaN(weight_in_kgs) || weight_in_kgs<0) {
             Alert.alert("Validation Error", "Please enter a valid weight in kgs.");
             return;
         }
@@ -39,32 +42,42 @@ const AddWeight = ({ visible, setVisible, onSave }: Props) => {
     };
 
     return (
-        <View style={styles.container}>
+        // <View style={styles.container}>
             <Modal
                 visible={visible}
                 animationType="slide"
                 transparent={true}
                 onRequestClose={handleClose}
             >
-                <View style={styles.modalOverlay}>
-                    <View style={styles.modalContent}>
-                        <Text style={styles.title}>Add Weight</Text>
-                        <Text style={styles.label}>Weight</Text>
-                        <TextInput
-                            onChangeText={(text) => handleChange("weight_in_kgs", text)}
-                            style={styles.input}
-                            keyboardType="numeric"
-                            placeholder="Weight (e.g. 65)"
-                        />
+                <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                    <View style={[styles.modalOverlay, Platform.OS === 'android' && {
+                        paddingBottom: keyboardHeight > 0 ? keyboardHeight : 0
+                    }]}>
+                        <KeyboardAvoidingView
+                            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                            style={styles.keyboardAvoidingView}
+                        >
+                            <View style={styles.modalContent}>
+                                <Text style={styles.title}>Add Weight</Text>
+                                <Text style={styles.label}>Weight</Text>
+                                <TextInput
+                                    onChangeText={(text) => handleChange("weight_in_kgs", text)}
+                                    style={styles.input}
+                                    keyboardType="numeric"
+                                    placeholder="Weight (e.g. 65)"
+                                    placeholderTextColor="#999" 
+                                />
 
-                        <View style={styles.buttonContainer}>
-                            <Button title="Save" onPress={handleSave} />
-                            <Button title="Cancel" color="grey" onPress={handleClose} />
-                        </View>
+                                <View style={styles.buttonContainer}>
+                                    <Button title="Cancel" size="small" variant="danger-inverted" onPress={handleClose} />
+                                    <Button title="Save" size="small" variant="primary-inverted" onPress={handleSave} />
+                                </View>
+                            </View>
+                        </KeyboardAvoidingView>
                     </View>
-                </View>
+                </TouchableWithoutFeedback>
             </Modal>
-        </View>
+        // </View>
     );
 };
 
@@ -127,6 +140,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#ccc',
         padding: 10,
+        color: '#000',
         borderRadius: 8,
         marginBottom: 12,
         justifyContent: 'center',
@@ -135,5 +149,9 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: '600',
         marginBottom: 5,
+    },
+    keyboardAvoidingView: {
+        flex: 1,
+        justifyContent: 'center',
     },
 });

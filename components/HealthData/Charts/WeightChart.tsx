@@ -1,5 +1,5 @@
 import { isoConverter } from "@/util/DateTimeFormet";
-import { useMemo } from "react";
+import { useMemo,useState } from "react";
 import { View, Dimensions } from "react-native"
 import { LineChart } from "react-native-gifted-charts";
 
@@ -9,32 +9,38 @@ interface dataPoint {
     label: string
 }
 
-const WeightChart = (props: { data: any[] }) => {
-    const {data} = props;
-        const screenWidth = Dimensions.get("window").width;
-    
-        const weightData = useMemo(()=>{
-            const weightData : dataPoint[]  = [];
-    
-            const reversedData = [...data].slice(0, 7).reverse();
-    
-            reversedData.forEach((item)=>{
-                let label = isoConverter(item.stampingTime);
-                weightData.push({ value: item.weightInKgs, label });
-            })
-    
-            return weightData;
-        }, [data]);
+const WeightChart = (props: { data: any[], height?: number }) => {
+    const {data, height} = props;
+    const [parentWidth, setParentWidth] = useState(Dimensions.get("window").width);
+
+
+    const handleWith = (event: any) => {
+        const { width } = event.nativeEvent.layout;
+        setParentWidth(width);
+    }
+
+    const weightData = useMemo(()=>{
+        const weightData : dataPoint[]  = [];
+
+        const reversedData = [...data].slice(0, 7).reverse();
+
+        reversedData.forEach((item)=>{
+            let label = isoConverter(item.stampingTime);
+            weightData.push({ value: item.weightInKgs, label });
+        })
+
+        return weightData;
+    }, [data]);
     return (
-        <View style={{ backgroundColor: "#e0e0e0", padding:10, borderRadius: 10}}>
+        <View style={{ backgroundColor: "#fff", padding:10, borderRadius: 10}} onLayout={handleWith}>
             <LineChart
-                width={screenWidth}
+                width={parentWidth*0.8}
                 color1="#338a43"
                 color2="#4782ba"
                 color3="#b03c3c"
-                height={300}
+                height={height??300}
                 data={weightData}
-                yAxisOffset={50}
+                yAxisOffset={0}
                 showVerticalLines
                 xAxisLabelTextStyle={
                     {fontSize: 10}

@@ -209,6 +209,7 @@ const MyMedication = () => {
             </View>
             <TextInput
                 placeholder='Search medications...'
+                placeholderTextColor="#999" 
                 style={{ padding: 10, borderWidth: 1, borderColor: '#ccc', borderRadius: 5, marginVertical: 10, marginHorizontal: 20 }}
                 onChangeText= {(text)=>{handleSearch(text)}}
             />

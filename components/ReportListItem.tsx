@@ -1,5 +1,11 @@
-import { Text, Modal, Pressable, StyleSheet, View, Button } from 'react-native';
-import React, { useState } from 'react';
+import { Text, Modal, Pressable, StyleSheet, View } from 'react-native';
+import React, { useContext, useState } from 'react';
+import { ReportType } from '@/util/type';
+import { handleViewReport } from '@/util/helper';
+import { AuthContext } from '@/context/AuthContext';
+import useApi from '@/CustomHooks/useCallAPI';
+import { useRouter } from 'expo-router';
+import Button from './Button';
 
 interface Report {
     id: number;
@@ -7,26 +13,17 @@ interface Report {
     reportDate: string;
 }
 
-interface ReportType {
-    id: number,
-    patientId: number,
-    reportName: string,
-    fileExtension: string,
-    reportDate: string,
-    createdAt: string,
-    updatedAt: string,
-    deleted: boolean
-}
-
 type ReportListItemProps = {
     report: ReportType,
     handleDelete: (report: ReportType) => void,
     handleEdit: (report:ReportType)=>void,
-    handleView: (report: ReportType) => void,
 }
 
-const ReportListItem:React.FC<ReportListItemProps> = ({report, handleDelete, handleEdit, handleView}) => {
+const ReportListItem:React.FC<ReportListItemProps> = ({report, handleDelete, handleEdit}) => {
     const [visibility, setVisibility] = useState(false);
+    const {user} = useContext(AuthContext);
+    const {callApi} = useApi();
+    const router = useRouter();
 
     const handleOptionSelect = (action: 'delete' | 'edit' | 'cancel') => {
         setVisibility(false);
@@ -47,7 +44,7 @@ const ReportListItem:React.FC<ReportListItemProps> = ({report, handleDelete, han
         <View>
             <View style={style.reportTab}>
                 <Pressable
-                    onPress={() => handleView(report)}
+                    onPress={() => handleViewReport(report, user, callApi, router)}
                     style={style.reportDetails}
                 >
                     <Text className='text-[#5288d9]'>{report.reportName}</Text>
@@ -64,9 +61,9 @@ const ReportListItem:React.FC<ReportListItemProps> = ({report, handleDelete, han
             > 
                 <View style={style.modalOverlay}>
                     <View style={style.menuContainer}>
-                        <View style={style.menuItem}><Button color='red' title='Delete' onPress={() => handleOptionSelect('delete')} /></View>
-                        <View style={style.menuItem}><Button title='Edit Access' onPress={() => handleOptionSelect('edit')} /></View>
-                        <View style={{padding:5}}><Button title='Cancel' onPress={() => handleOptionSelect('cancel')} /></View>
+                        <View style={style.menuItem}><Button size='small' variant='danger-inverted' title='Delete' onPress={() => handleOptionSelect('delete')} /></View>
+                        <View style={style.menuItem}><Button size='small' variant='primary-inverted' title='Edit Access' onPress={() => handleOptionSelect('edit')} /></View>
+                        <View style={{ padding: 5 }}><Button size='small' variant='secondary-inverted' title='Cancel' onPress={() => handleOptionSelect('cancel')} /></View>
                     </View>
                 </View>
             </Modal>

@@ -1,4 +1,4 @@
-import { Text, StyleSheet, View, Button, ActivityIndicator, Alert, TouchableOpacity } from 'react-native'
+import { Text, StyleSheet, View, ActivityIndicator, Alert, TouchableOpacity } from 'react-native'
 import { SafeAreaView } from "react-native-safe-area-context";
 import React, { useContext, useEffect, useState } from 'react'
 import UploadReport from '@/components/UploadReport'
@@ -11,17 +11,8 @@ import { ReportDataContext } from '@/context/ReportContext'
 import { DoctorDataContext } from '@/context/DoctorContext'
 import AccessibilityAndAffiliationForReport from '@/components/AccessibilityAndAffiliationForReport'
 import { BackSVG } from '@/assets/svgComponents/generalSVGs'
-
-interface ReportType {
-  id: number,
-  patientId: number,
-  reportName: string,
-  fileExtension: string,
-  reportDate: string,
-  createdAt: string,
-  updatedAt: string,
-  deleted: boolean
-}
+import { ReportType } from '@/util/type';
+import Button from '@/components/Button';
 
 interface DoctorDetails {
   degree: string;
@@ -41,9 +32,7 @@ interface Doctor {
 }
 
 const UploadReports = () => {
-  const { callApi: callReportsApi, loading: loadingReports, error: reportsError } = useApi();
-  const { callApi} = useApi();
-
+  const { callApi, loading: loadingDoctors } = useApi();
 
   const { reportData, setReportData } = useContext(ReportDataContext);
   const { doctorData, setDoctorData } = useContext(DoctorDataContext);
@@ -53,21 +42,39 @@ const UploadReports = () => {
 
   const { user } = useContext(AuthContext);
 
-  const fetchReports = async () => {
-    try{
-      const request = await callReportsApi({
+  // Only fetch reports if context is empty (shouldn't happen if widget loaded first)
+  const fetchReportsIfNeeded = async () => {
+    if (!reportData) {
+      try {
+        const request = await callApi({
+          url: `${process.env.EXPO_PUBLIC_BACKEND_SERVER}/patient/myReports`,
+          method: "GET",
+          headers: {
+            "Patient-Id": user?.id ?? "-1"
+          }
+        });
+        setReportData(request.data);
+      } catch (err) {
+        console.log(err);
+      }
+    }
+  };
+
+  // Refresh reports (called after upload/delete)
+  const refreshReports = async () => {
+    try {
+      const request = await callApi({
         url: `${process.env.EXPO_PUBLIC_BACKEND_SERVER}/patient/myReports`,
         method: "GET",
         headers: {
           "Patient-Id": user?.id ?? "-1"
         }
-      })
-      console.log(request);
+      });
       setReportData(request.data);
-    }catch(err){
+    } catch (err) {
       console.log(err);
     }
-  }
+  };
 
   const fetchDoctors = async () => {
     try {
@@ -85,7 +92,7 @@ const UploadReports = () => {
   }
 
   useEffect(() => {
-    fetchReports();
+    fetchReportsIfNeeded(); // Only fetch if context is empty
     fetchDoctors();
   }, [])
 
@@ -115,11 +122,12 @@ const UploadReports = () => {
                   "Patient-Id": user?.id ?? "-1"
                 },
               });
+              // Update context directly
               setReportData(prev => prev?.filter(r => r.id !== report.id) ?? null);
               console.log("Delete successful:", request);
             } catch (error) {
               console.error("Delete failed:", error);
-              fetchReports();
+              refreshReports(); // Refresh if delete fails
             }
           },
         },
@@ -127,31 +135,8 @@ const UploadReports = () => {
     );
   };
 
-  const handleViewReport = async (report: ReportType) => {
-    const urlString = `${process.env.EXPO_PUBLIC_BACKEND_SERVER}/common/s3UrlGenerator?key=reports/${user?.id}/${report.reportDate}/${report.reportName}.pdf`;
-      try{
-        const request = await callApi({
-          url: urlString,
-          method: "GET",
-          headers: {
-            "Patient-Id": user?.id ?? "-1"
-          },
-        })
-        
-        const presignedUrl = request.data;
-
-        router.push({
-          pathname: '/home/pdfViewer',
-          params: { url: encodeURIComponent(presignedUrl) },
-        });
-      }
-      catch(err){
-        console.log(err);
-      }
-  }
-
   const handleUploadSuccess = (report: ReportType) => {
-    fetchReports();
+    refreshReports(); // Refresh reports after upload
     Alert.alert('Success', 'File uploaded successfully', [{
       text: 'ok',
       onPress: () => {
@@ -175,27 +160,33 @@ const UploadReports = () => {
         <Text style={GlobalStyleSheet.mainHeading}>Upload Reports</Text>
       </View>
       <View style={{ height: '40%' }}><UploadReport handleUploadSuccess={handleUploadSuccess} /></View>
-      {loadingReports ? (
+
+      {/* Show loading only if both reportData is null and we might be fetching */}
+      {!reportData && loadingDoctors ? (
         <ActivityIndicator />
       ) : (
-        reportData && reportData.length > 0 ? <View style={{ height: '100%'}}>
-              <Text style={style.recentReportHeading}>Recent Reports</Text>
-              <View style={style.recentReportsContiner}>
-                {reportData?.slice(0, 6)?.map((report) => (
-                  <ReportListItem key={report.id}
-                    report={report}
-                    handleDelete={handleDelete}
-                    handleEdit={handleEdit}
-                    handleView={handleViewReport} />
-                ))}
-              </View>
-              {reportData.length > 6 ? <Button
-                title="load more ..."
-                onPress={() => {
-                  router.push('/home/myReports')
-                }}
-              /> : <></>}
-        </View> : <Text style={{ textAlign: "center", fontWeight: "bold", fontSize: 16, color:"#424242", marginTop: 10}}>No reports available</Text>
+        reportData && reportData.length > 0 ?
+          <View style={{ height: '100%' }}>
+            <Text style={style.recentReportHeading}>Recent Reports</Text>
+            <View style={style.recentReportsContiner}>
+              {reportData?.slice(0, 6)?.map((report) => (
+                <ReportListItem key={report.id}
+                  report={report}
+                  handleDelete={handleDelete}
+                  handleEdit={handleEdit} />
+              ))}
+            </View>
+            {reportData.length > 6 ? <Button
+              variant='primary-inverted'
+              title="load more ..."
+              onPress={() => {
+                router.push('/home/myReports')
+              }}
+            /> : <></>}
+          </View> :
+          <Text style={{ textAlign: "center", fontWeight: "bold", fontSize: 16, color: "#424242", marginTop: 10 }}>
+            No reports available
+          </Text>
       )}
       <AccessibilityAndAffiliationForReport doctors={doctorData || []} openModel={openModel} setOpenModel={setOpenModel} reportID={selectedReportID} />
     </SafeAreaView>
@@ -218,4 +209,4 @@ const style = StyleSheet.create({
   },
 });
 
-export default UploadReports
+export default UploadReports;

@@ -145,6 +145,7 @@ const DoctorAffiliation: React.FC = () => {
                         <TextInput
                             style={styles.input}
                             placeholder= "Doctor ID"
+                            placeholderTextColor="#999" 
                             keyboardType="numeric"
                             value={doctorId}
                             onChangeText={setDoctorId}
@@ -228,7 +229,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
     fetchButton: {
-        backgroundColor: "#4cd137",
+        backgroundColor: "#90e0ef",
         padding: 12,
         borderRadius: 10,
         alignItems: "center",
@@ -257,7 +258,7 @@ const styles = StyleSheet.create({
         marginBottom: 6,
     },
     sendButton: {
-        backgroundColor: "#e84118",
+        backgroundColor: "#00b4d8",
         padding: 14,
         borderRadius: 10,
         alignItems: "center",

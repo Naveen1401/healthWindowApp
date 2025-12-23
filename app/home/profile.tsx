@@ -8,7 +8,6 @@ import {
   StyleSheet,
   Alert,
   ActivityIndicator,
-  Button,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -17,6 +16,7 @@ import useApi from "@/CustomHooks/useCallAPI";
 import { BackSVG } from "@/assets/svgComponents/generalSVGs";
 import { useNavigation } from "expo-router";
 import GlobalStyleSheet from "../globalStyle";
+import Button from "@/components/Button";
 
 export default function Profile({ navigation }: any) {
   const { user, logout, setUserData } = useContext(AuthContext);
@@ -224,6 +224,7 @@ export default function Profile({ navigation }: any) {
               onChangeText={setPhoneNumber}
               keyboardType="phone-pad"
               placeholder="Enter phone number"
+              placeholderTextColor="#999" 
               style={styles.input}
             />
           ) : (
@@ -237,7 +238,7 @@ export default function Profile({ navigation }: any) {
           <Text style={[styles.value, { color: "#555" }]}>{email}</Text>
         </View>
 
-        <Button title="Log Out" color={"red"} onPress={logout} />
+        <Button title="Log Out" variant='danger-inverted' onPress={logout} />
 
         {loading && (
           <ActivityIndicator size="large" color="#0000ff" style={{ marginTop: 24 }} />

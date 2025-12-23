@@ -1,5 +1,7 @@
+import useKeyboardHeight from "@/CustomHooks/useKeyboardHeight";
 import { useState } from "react";
-import { Alert, Button, Modal, StyleSheet, Text, TextInput, View } from "react-native";
+import { Alert, Modal, StyleSheet, Text, TextInput, View, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView, Platform } from "react-native";
+import Button from "@/components/Button";
 
 interface BPType {
     systolic: number;
@@ -15,6 +17,7 @@ interface Props {
 
 const AddBloodPressure = ({ visible, setVisible, onSave }: Props) => {
     const [healthRecord, setHealthRecord] = useState<Partial<BPType>>({});
+    const keyboardHeight = useKeyboardHeight();
 
     const handleChange = (field: keyof BPType, value: string) => {
         setHealthRecord((prev) => ({
@@ -32,9 +35,9 @@ const AddBloodPressure = ({ visible, setVisible, onSave }: Props) => {
         const { systolic, diastolic, heart_beat_per_min } = healthRecord;
 
         if (
-            typeof systolic !== "number" || isNaN(systolic) ||
-            typeof diastolic !== "number" || isNaN(diastolic) ||
-            typeof heart_beat_per_min !== "number" || isNaN(heart_beat_per_min)
+            typeof systolic !== "number" || isNaN(systolic) || systolic<0 ||
+            typeof diastolic !== "number" || isNaN(diastolic) || diastolic<0 ||
+            typeof heart_beat_per_min !== "number" || isNaN(heart_beat_per_min) || heart_beat_per_min <0
         ) {
             Alert.alert("Validation Error", "Please fill in all fields with valid numbers.");
             return;
@@ -69,49 +72,62 @@ heart beats per min : ${heart_beat_per_min}`,
     };
 
     return (
-        <View style={styles.container}>
+        // <View style={styles.container}>
             <Modal
                 visible={visible}
                 animationType="slide"
                 transparent={true}
                 onRequestClose={handleClose}
             >
-                <View style={styles.modalOverlay}>
-                    <View style={styles.modalContent}>
-                        <Text style={styles.title}>Add BP Data</Text>
+                <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                    <View style={[styles.modalOverlay, Platform.OS === 'android' && {
+                        paddingBottom: keyboardHeight > 0 ? keyboardHeight : 0
+                    }]}>
+                        <KeyboardAvoidingView
+                            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                            style={styles.keyboardAvoidingView}
+                        >
 
-                        <Text style={styles.label}>Systolic</Text>
-                        <TextInput
-                            onChangeText={(text) => handleChange("systolic", text)}
-                            style={styles.input}
-                            keyboardType="numeric"
-                            placeholder="Systolic (e.g. 120)"
-                        />
+                        <View style={styles.modalContent}>
+                            <Text style={styles.title}>Add BP Data</Text>
 
-                        <Text style={styles.label}>Diastolic</Text>
-                        <TextInput
-                            onChangeText={(text) => handleChange("diastolic", text)}
-                            style={styles.input}
-                            keyboardType="numeric"
-                            placeholder="Diastolic (e.g. 80)"
-                        />
+                            <Text style={styles.label}>Systolic</Text>
+                            <TextInput
+                                onChangeText={(text) => handleChange("systolic", text)}
+                                style={styles.input}
+                                keyboardType="numeric"
+                                placeholder="Systolic (e.g. 120)"
+                                placeholderTextColor="#999" 
+                            />
 
-                        <Text style={styles.label}>Heart Beats per min</Text>
-                        <TextInput
-                            onChangeText={(text) => handleChange("heart_beat_per_min", text)}
-                            style={styles.input}
-                            keyboardType="numeric"
-                            placeholder="Heart Beats/min (e.g. 70)"
-                        />
+                            <Text style={styles.label}>Diastolic</Text>
+                            <TextInput
+                                onChangeText={(text) => handleChange("diastolic", text)}
+                                style={styles.input}
+                                keyboardType="numeric"
+                                placeholder="Diastolic (e.g. 80)"
+                                placeholderTextColor="#999" 
+                            />
 
-                        <View style={styles.buttonContainer}>
-                            <Button title="Save" onPress={handleSave} />
-                            <Button title="Cancel" color="grey" onPress={handleClose} />
+                            <Text style={styles.label}>Heart Beats per min</Text>
+                            <TextInput
+                                onChangeText={(text) => handleChange("heart_beat_per_min", text)}
+                                style={styles.input}
+                                keyboardType="numeric"
+                                placeholder="Heart Beats/min (e.g. 70)"
+                                placeholderTextColor="#999" 
+                            />
+
+                            <View style={styles.buttonContainer}>
+                                <Button size="small" variant="danger-inverted" title="Cancel" onPress={handleClose} />
+                                <Button size="small" variant="primary-inverted" title="Save" onPress={handleSave} />
+                            </View>
                         </View>
+                        </KeyboardAvoidingView>
                     </View>
-                </View>
+                </TouchableWithoutFeedback>
             </Modal>
-        </View>
+        // </View>
     );
 };
 
@@ -172,6 +188,7 @@ const styles = StyleSheet.create({
     input: {
         borderWidth: 1,
         borderColor: '#ccc',
+        color: '#000',
         padding: 10,
         borderRadius: 8,
         marginBottom: 12,
@@ -181,5 +198,9 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: '600',
         marginBottom: 5,
+    },
+    keyboardAvoidingView: {
+        flex: 1,
+        justifyContent: 'center',
     },
 });

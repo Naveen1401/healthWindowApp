@@ -98,6 +98,10 @@ const MyConsultations = () => {
                 <Text style={styles.label}>Date</Text>
                 <Text style={styles.value}>{start.day}, {start.fullDate}</Text>
 
+                {/* DoctorID */}
+                <Text style={styles.label}>Docter ID</Text>
+                <Text style={styles.value}>{item.doctor_id}</Text>
+
                 {/* Time */}
                 <Text style={styles.label}>Time</Text>
                 <Text style={styles.value}>
