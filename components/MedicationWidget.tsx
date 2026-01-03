@@ -7,6 +7,7 @@ import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@/context/AuthContext";
 import MedicationTab from "./MedicationTab";
 import { DateFormat } from "@/util/DateTimeFormet";
+import { useHomeRefresh } from "@/context/HomeRefreshContext";
 
 interface ListItem {
     intakeTime: string;
@@ -17,17 +18,14 @@ interface ListItem {
     isTaken?: boolean;
 }
 
-type MedicationWidgetProps = {
-    onDragStart?: () => void;
-};
-
-const MedicationWidget:React.FC<MedicationWidgetProps> = ({onDragStart}) => {
+const MedicationWidget = () => {
     const router = useRouter();
     const { callApi } = useApi();
     const { user } = useContext(AuthContext);
     const [todayMedications, setTodayMedications] = useState<ListItem[]>([]);
     const [loading, setLoading] = useState(true);
     const todayDate = DateFormat(new Date());
+    const { refreshVersion, startRefresh, endRefresh } = useHomeRefresh();
 
     const listItemHandler = (json: any, date: string) => {
         const transformedData: ListItem[] = json.data.schedule.map((scheduleItem: any) => {
@@ -90,14 +88,20 @@ const MedicationWidget:React.FC<MedicationWidgetProps> = ({onDragStart}) => {
     };
 
     useEffect(() => {
-        medicationData(todayDate);
-    }, []);
+        console.log("Fetching new medications");
+        const run = async () => {
+            startRefresh();
+            await medicationData(todayDate);
+            endRefresh();
+        };
+
+        run();
+    }, [refreshVersion]);
 
     const header = (
         <WidgetHeader
             title="Medication"
             onHeaderPress={() => router.push('/home/medication')}
-            onDragStart={onDragStart}
         />
     );
 

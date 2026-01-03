@@ -6,6 +6,7 @@ import { useContext, useEffect, useState } from "react"
 import { AuthContext } from "@/context/AuthContext"
 import useApi from "@/CustomHooks/useCallAPI"
 import WidgetList from "./Widgets/WidgetList"
+import { useHomeRefresh } from "@/context/HomeRefreshContext"
 
 export type ConsultationItem = {
     id: number;
@@ -23,16 +24,13 @@ export type ConsultationItem = {
     updated_at: string;
 };
 
-type ConsultationWidgetProps = {
-    onDragStart?: () => void;
-};
-
-const ConsultationWidget: React.FC<ConsultationWidgetProps> = ({onDragStart}) => {
+const ConsultationWidget = () => {
     const router = useRouter();
     const { user } = useContext(AuthContext);
     const { callApi, loading } = useApi();
     const [todayConsultations, setTodayConsultations] = useState<ConsultationItem[]>([]);
     const [error, setError] = useState("");
+    const { refreshVersion, startRefresh, endRefresh } = useHomeRefresh();
 
     // Get today's date in YYYY-MM-DD format
     const getTodayDate = () => {
@@ -84,8 +82,15 @@ const ConsultationWidget: React.FC<ConsultationWidgetProps> = ({onDragStart}) =>
     };
 
     useEffect(() => {
-        fetchConsultations();
-    }, []);
+        console.log("Fetching new consultaions");
+        const run = async () => {
+            startRefresh();
+            await fetchConsultations();
+            endRefresh();
+        };
+
+        run();
+    }, [refreshVersion]);
 
     const handleJoinMeeting = (meetLink: string) => {
         if (meetLink) {
@@ -99,9 +104,8 @@ const ConsultationWidget: React.FC<ConsultationWidgetProps> = ({onDragStart}) =>
 
     const header = (
         <WidgetHeader
-            title="Today's Consultations"
+            title="Today's Scheduled Consultations"
             onHeaderPress={() => router.push('/home/myconsultation')}
-            onDragStart={onDragStart}
         />
     );
 

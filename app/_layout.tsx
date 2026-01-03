@@ -5,7 +5,7 @@ import "./global.css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReportDataProvider } from "@/context/ReportContext";
 import { DoctorDataProvider } from "@/context/DoctorContext";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { HomeRefreshProvider } from "@/context/HomeRefreshContext";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -24,9 +24,9 @@ export default function RootLayout() {
       <AuthProvider>
         <DoctorDataProvider>
           <ReportDataProvider>
-            <GestureHandlerRootView style={{ flex: 1 }}>
+            <HomeRefreshProvider>
               <Stack screenOptions={{ headerShown: false }} />
-            </GestureHandlerRootView>
+            </HomeRefreshProvider>
           </ReportDataProvider>
         </DoctorDataProvider>
       </AuthProvider>

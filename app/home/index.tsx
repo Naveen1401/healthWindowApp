@@ -1,47 +1,29 @@
 import React, { useContext, useState } from "react";
-import { View, Text, Button, StyleSheet, Image, TouchableOpacity, ImageSourcePropType, Pressable, ScrollView } from "react-native";
+import { View, Text, Button, StyleSheet, Image, TouchableOpacity, ImageSourcePropType, Pressable, ScrollView, RefreshControl } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { AuthContext } from "@/context/AuthContext";
+import { HeathDataType } from "@/util/type";
 import HealthDataWidget from "@/components/HealthDataWidget";
 import MedicationWidget from "@/components/MedicationWidget";
 import ConsultationWidget from "@/components/ConsultationWidget";
 import ReportWidget from "@/components/ReportWidget";
-import DraggableFlatList, {
-  RenderItemParams,
-} from "react-native-draggable-flatlist";
-
-type WidgetItem = {
-  key: string;
-  component: JSX.Element;
-};
+import { useHomeRefresh } from "@/context/HomeRefreshContext";
+import OPSWidget from "@/components/OPDWidget";
 
 
 export default function HomeScreen() {
+  const { triggerRefresh, refreshingCount } = useHomeRefresh();
+
+  const refreshing = refreshingCount > 0;
+
+  const onRefresh = () => {
+    triggerRefresh();
+  };
+
   const router = useRouter();
   const { user } = useContext(AuthContext);
-
-  const [widgets, setWidgets] = useState<WidgetItem[]>([
-    { key: "health", component: <HealthDataWidget /> },
-    { key: "medication", component: <MedicationWidget /> },
-    { key: "consultation", component: <ConsultationWidget /> },
-    { key: "report", component: <ReportWidget /> },
-  ]);
-
-  const renderWidget = ({ item, drag, isActive }: RenderItemParams<WidgetItem>) => {
-    return (
-      <View
-        style={[
-          styles.draggableItemWrapper,
-          { opacity: isActive ? 0.9 : 1 },
-        ]}
-      >
-        {React.cloneElement(item.component, {
-          onDragStart: drag, 
-        })}
-      </View>
-    );
-  };
+  const [selectedChart, setSelectedChart] = useState<HeathDataType>('weight');
 
   const screenHeader = (
     <View style={styles.welcomeContainer}>
@@ -90,25 +72,32 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <DraggableFlatList
-        data={widgets}
-        keyExtractor={(item) => item.key}
-        renderItem={renderWidget}
-        onDragEnd={({ data }) => setWidgets(data)}
-        activationDistance={10}
+      <ScrollView
         showsVerticalScrollIndicator={false}
+        style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
-        ListHeaderComponent={
-          <>
-            {screenHeader}
-            <View style={styles.widgetContainer}>
-              {myDoctors}
-            </View>
-          </>
+        alwaysBounceVertical={true}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#0064f7"       // iOS spinner color
+            colors={["#0064f7"]}     // Android spinner color
+          />
         }
-
-        ListFooterComponent={<View style={styles.bottomSpacing} />}
-      />
+        >
+        {screenHeader}
+        <View style={styles.widgetContainer}>
+          {myDoctors}
+          <HealthDataWidget />
+          <MedicationWidget />
+          <ConsultationWidget />
+          <ReportWidget/>
+          <OPSWidget/>
+          {/* Add some bottom padding for better scrolling */}
+          <View style={styles.bottomSpacing} />
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -152,11 +141,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 20,
+    flexGrow: 1,
   },
   widgetContainer: {
-    marginTop: 16,
-    paddingHorizontal: 16,
+    padding: 16,
   },
   bottomSpacing: {
     height: 20, // Add some space at the bottom for better scrolling
@@ -189,8 +177,5 @@ const styles = StyleSheet.create({
     justifyContent:'center',
     alignItems: 'center',
     marginLeft: 8,
-  },
-  draggableItemWrapper: {
-    paddingHorizontal: 16,
-  },
+  }
 });

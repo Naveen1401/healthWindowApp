@@ -131,57 +131,56 @@ const DoctorAffiliation: React.FC = () => {
                 <>
                     <View style={GlobalStyleSheet.header}>
                         {/* Back Button */}
-                        <TouchableOpacity
-                            style={GlobalStyleSheet.backBtn}
-                            onPress={() => navigate.goBack()}
-                        >
-                            <BackSVG style={GlobalStyleSheet.backIcon} />
-                        </TouchableOpacity>
+                            <TouchableOpacity
+                                style={GlobalStyleSheet.backBtn}
+                                onPress={() => navigate.goBack()}
+                            >
+                                <BackSVG style={GlobalStyleSheet.backIcon} />
+                            </TouchableOpacity>
 
-                        {/* Title */}
-                            <Text style={GlobalStyleSheet.mainHeading}>Link with Doctor</Text>
-                    </View>
-                    <View style={{padding:10}}>
-                        <TextInput
-                            style={styles.input}
-                            placeholder= "Doctor ID"
-                            placeholderTextColor="#999" 
-                            keyboardType="numeric"
-                            value={doctorId}
-                            onChangeText={setDoctorId}
-                        />
+                            {/* Title */}
+                                <Text style={GlobalStyleSheet.mainHeading}>Link with Doctor</Text>
+                        </View>
+                            <View style={{padding: 10, flex: 1, justifyContent: 'center' }}>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder= "Doctor ID"
+                                    placeholderTextColor="#999" 
+                                    keyboardType="numeric"
+                                    value={doctorId}
+                                    onChangeText={setDoctorId}
+                                />
 
-                        {/* <TouchableOpacity
-                            style={styles.scanButton}
-                            onPress={() => setScanning(true)}
-                        >
-                            <Text style={styles.scanButtonText}>📷 Scan QR Code</Text>
-                        </TouchableOpacity> */}
+                                {/* <TouchableOpacity
+                                    style={styles.scanButton}
+                                    onPress={() => setScanning(true)}
+                                >
+                                    <Text style={styles.scanButtonText}>📷 Scan QR Code</Text>
+                                </TouchableOpacity> */}
 
-                        <TouchableOpacity
-                            style={styles.fetchButton}
-                            onPress={() => fetchDoctorDetails(doctorId)}
-                        >
-                            <Text style={styles.fetchButtonText}>Fetch Doctor Details</Text>
-                        </TouchableOpacity>
+                            {loadingDocter && <ActivityIndicator size="large" style={{ marginVertical: 10 }} />}
 
-                        {loadingDocter && <ActivityIndicator size="large" style={{ marginVertical: 10 }} />}
+                            {doctorData && (
+                                <View style={styles.doctorCard}>
+                                    <Image source={{ uri: doctorData.image_url }} style={styles.image} />
+                                    <Text style={styles.name}>
+                                        {doctorData.first_name} {doctorData.last_name}
+                                    </Text>
+                                    <Text>Email: {doctorData.email}</Text>
+                                    <Text>Experience: {doctorData.doctor_details.yrs_of_exp} years</Text>
+                                    <Text>Status: {doctorData.status}</Text>
+                                </View>
+                            )}
 
-                        {doctorData && (
-                            <View style={styles.doctorCard}>
-                                <Image source={{ uri: doctorData.image_url }} style={styles.image} />
-                                <Text style={styles.name}>
-                                    {doctorData.first_name} {doctorData.last_name}
-                                </Text>
-                                <Text>Email: {doctorData.email}</Text>
-                                <Text>Experience: {doctorData.doctor_details.yrs_of_exp} years</Text>
-                                <Text>Status: {doctorData.status}</Text>
-                            </View>
-                        )}
-
-                        <TouchableOpacity style={styles.sendButton} onPress={sendAffiliationRequest}>
-                            <Text style={styles.sendButtonText}>Send Request</Text>
-                        </TouchableOpacity>
+                            {!doctorData ? <TouchableOpacity
+                                style={styles.fetchButton}
+                                onPress={() => fetchDoctorDetails(doctorId)}
+                            >
+                                <Text style={styles.fetchButtonText}>Fetch Doctor Details</Text>
+                            </TouchableOpacity>:
+                            <TouchableOpacity style={styles.sendButton} onPress={sendAffiliationRequest}>
+                                <Text style={styles.sendButtonText}>Send Request</Text>
+                            </TouchableOpacity>}
                     </View>
                 </>
             )}
@@ -193,7 +192,7 @@ export default DoctorAffiliation;
 
 const styles = StyleSheet.create({
     container: {
-        height: '100%',
+        height: '100%'
     },
     center: {
         flex: 1,
@@ -208,14 +207,13 @@ const styles = StyleSheet.create({
     },
     input: {
         borderWidth: 1,
-        width: '50%',
-        margin: 'auto',
         borderColor: "#ccc",
         borderRadius: 10,
         padding: 20,
         marginBottom: 15,
         fontSize: 16,
         textAlign: 'center',
+        marginHorizontal: 100
     },
     scanButton: {
         backgroundColor: "#2e86de",
@@ -229,7 +227,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
     fetchButton: {
-        backgroundColor: "#90e0ef",
+        backgroundColor: "#428dff",
         padding: 12,
         borderRadius: 10,
         alignItems: "center",
@@ -258,7 +256,7 @@ const styles = StyleSheet.create({
         marginBottom: 6,
     },
     sendButton: {
-        backgroundColor: "#00b4d8",
+        backgroundColor: "#0064f7",
         padding: 14,
         borderRadius: 10,
         alignItems: "center",

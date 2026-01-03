@@ -9,16 +9,14 @@ import { AuthContext } from "@/context/AuthContext";
 import useApi from "@/CustomHooks/useCallAPI";
 import { useRouter } from "expo-router";
 import AddHealthData from "./AddHealthData";
-import GlobalStyleSheet from "@/app/globalStyle";
+import { useHomeRefresh } from "@/context/HomeRefreshContext";
 
 interface HealthDataWidgetProps {
     initialType?: HeathDataType;
-    onDragStart?: () => void;
 }
 
 const HealthDataWidget: React.FC<HealthDataWidgetProps> = ({
     initialType = 'weight',
-    onDragStart
 }) => {
     const [selectedType, setSelectedType] = useState<HeathDataType>(initialType);
     const [healthData, setHealthData] = useState<any[]>([]);
@@ -28,10 +26,19 @@ const HealthDataWidget: React.FC<HealthDataWidgetProps> = ({
     const [visible, setVisible] = useState<boolean> (false);
     const router = useRouter();
 
-    // Fetch data based on selected type
+    const { refreshVersion, startRefresh, endRefresh } = useHomeRefresh();
+
     useEffect(() => {
-        fetchHealthData();
-    }, [selectedType]);
+        console.log("Fetching new health data");
+        const run = async () => {
+            startRefresh();
+            await fetchHealthData();
+            endRefresh();
+        };
+
+        run();
+    }, [selectedType, refreshVersion]);
+
 
     const fetchHealthData = async () => {
         setLoading(true);
@@ -118,7 +125,6 @@ const HealthDataWidget: React.FC<HealthDataWidgetProps> = ({
                 />
             }
             onHeaderPress={() => router.push('/home/healthData')}
-            onDragStart={onDragStart}
         />
     );
 

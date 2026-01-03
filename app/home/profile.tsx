@@ -157,7 +157,7 @@ export default function Profile({ navigation }: any) {
             )}
 
             {/* Title */}
-            <Text style={GlobalStyleSheet.mainHeading}>Medication Record</Text>
+            <Text style={GlobalStyleSheet.mainHeading}>My Profile</Text>
           <TouchableOpacity style={GlobalStyleSheet.addBtn} onPress={() => {
                 if (isEditing) saveProfile();
                 else setIsEditing(true);

@@ -118,6 +118,7 @@ const MyDoctors = () => {
     return (
         <SafeAreaView style={styles.container}>
             <View style={GlobalStyleSheet.header}>
+                {/* Back Button */}
                 <TouchableOpacity
                     style={GlobalStyleSheet.backBtn}
                     onPress={() => router.back()}
@@ -125,25 +126,31 @@ const MyDoctors = () => {
                     <BackSVG style={GlobalStyleSheet.backIcon} />
                 </TouchableOpacity>
 
+                {/* Title */}
                 <Text style={GlobalStyleSheet.mainHeading}>My Doctors</Text>
+                <TouchableOpacity style={GlobalStyleSheet.addBtn} onPress={() => router.push('/home/docterAffiliation')}>
+                    <Text style={{ color: '#2563EB', fontSize: 16 }}>Add +</Text>
+                </TouchableOpacity>
             </View>
             
 
             {/* Search */}
-            <TextInput
-                placeholder="Search by doctor name or ID"
-                placeholderTextColor="#999" 
-                value={search}
-                onChangeText={setSearch}
-                style={styles.search}
-            />
+            <View style={{paddingHorizontal: 10, flex: 1}}>
+                <TextInput
+                    placeholder="Search by doctor name or ID"
+                    placeholderTextColor="#999" 
+                    value={search}
+                    onChangeText={setSearch}
+                    style={styles.search}
+                />
 
-            <FlatList
-                data={filteredDoctors}
-                keyExtractor={(item) => item.id.toString()}
-                renderItem={renderDoctor}
-                contentContainerStyle={{ paddingBottom: 20 }}
-            />
+                <FlatList
+                    data={filteredDoctors}
+                    keyExtractor={(item) => item.id.toString()}
+                    renderItem={renderDoctor}
+                    contentContainerStyle={{ paddingBottom: 20 }}
+                />
+            </View>
         </SafeAreaView>
     );
 };
@@ -151,7 +158,6 @@ const MyDoctors = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 14,
         backgroundColor: "#F9FAFB"
     },
     header: {

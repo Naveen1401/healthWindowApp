@@ -8,6 +8,7 @@ import useApi from "@/CustomHooks/useCallAPI";
 import { ReportDataContext } from "@/context/ReportContext";
 import WidgetList from "./Widgets/WidgetList";
 import { handleViewReport } from "@/util/helper";
+import { useHomeRefresh } from "@/context/HomeRefreshContext";
 
 interface ReportType {
     id: number,
@@ -20,11 +21,7 @@ interface ReportType {
     deleted: boolean
 }
 
-type ReportWidgetProps = {
-    onDragStart?: () => void;
-};
-
-const ReportWidget: React.FC<ReportWidgetProps> = ({onDragStart}) => {
+const ReportWidget = () => {
     const router = useRouter();
     const { user } = useContext(AuthContext);
     const { reportData, setReportData } = useContext(ReportDataContext);
@@ -59,14 +56,22 @@ const ReportWidget: React.FC<ReportWidgetProps> = ({onDragStart}) => {
         }
     };
 
-    // Initial fetch only if context is empty
-    useEffect(() => {
-        if (!reportData && !hasFetchedInitial) {
-            fetchReports();
-        } else {
-            setHasFetchedInitial(true);
-        }
-    }, []);
+    const { refreshVersion, startRefresh, endRefresh } = useHomeRefresh();
+    
+        useEffect(() => {
+            console.log("Fetching new reports");
+            const run = async () => {
+                startRefresh();
+                if (!reportData && !hasFetchedInitial) {
+                    await fetchReports();
+                } else {
+                    setHasFetchedInitial(true);
+                }
+                endRefresh();
+            };
+    
+            run();
+        }, [refreshVersion]);
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
@@ -81,7 +86,6 @@ const ReportWidget: React.FC<ReportWidgetProps> = ({onDragStart}) => {
         <WidgetHeader
             title="Recent Reports"
             onHeaderPress={() => router.push('/home/uploadReports')}
-            onDragStart={onDragStart}
         />
     );
 

@@ -148,7 +148,7 @@ const MyConsultations = () => {
                 </TouchableOpacity>
 
                 {/* Title */}
-                <Text style={GlobalStyleSheet.mainHeading}>Consultation Schedule</Text>
+                <Text style={GlobalStyleSheet.mainHeading}>Scheduled Consultations</Text>
             </View>
             {consultations.length===0?
                 <View style={styles.center}>
