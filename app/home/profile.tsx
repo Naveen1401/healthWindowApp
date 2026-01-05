@@ -17,9 +17,15 @@ import { BackSVG } from "@/assets/svgComponents/generalSVGs";
 import { useNavigation } from "expo-router";
 import GlobalStyleSheet from "../globalStyle";
 import Button from "@/components/Button";
+import { ReportDataContext } from "@/context/ReportContext";
+import { DoctorDataContext } from "@/context/DoctorContext";
+import { HomeRefreshProvider, useHomeRefresh } from "@/context/HomeRefreshContext";
 
 export default function Profile({ navigation }: any) {
   const { user, logout, setUserData } = useContext(AuthContext);
+  const {clearReportData} = useContext(ReportDataContext);
+  const {clearDoctorContext} = useContext(DoctorDataContext);
+  const {clearRefreshContext} = useHomeRefresh()
 
   const name = user?.name?.split(" ") || ["", ""];
   const phoneNo = user?.phoneNo || "";
@@ -78,6 +84,13 @@ export default function Profile({ navigation }: any) {
     setProfileImage(user?.imageURL || "");
     setPhoneNumber(phoneNo); // reset phone
   };
+
+  const handleLogout = () => {
+    logout();
+    clearReportData();
+    clearDoctorContext();
+    clearRefreshContext();
+  }
 
   const pickImageFromGallery = async () => {
     const permissionResult =
@@ -238,7 +251,7 @@ export default function Profile({ navigation }: any) {
           <Text style={[styles.value, { color: "#555" }]}>{email}</Text>
         </View>
 
-        <Button title="Log Out" variant='danger-inverted' onPress={logout} />
+        <Button title="Log Out" variant='danger-inverted' onPress={handleLogout} />
 
         {loading && (
           <ActivityIndicator size="large" color="#0000ff" style={{ marginTop: 24 }} />

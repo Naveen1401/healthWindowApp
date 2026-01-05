@@ -6,6 +6,7 @@ const HomeRefreshContext = createContext({
     refreshingCount: 0,
     startRefresh: () => { },
     endRefresh: () => { },
+    clearRefreshContext: () => {}
 });
 
 export const HomeRefreshProvider = ({ children }: any) => {
@@ -24,6 +25,11 @@ export const HomeRefreshProvider = ({ children }: any) => {
         setRefreshingCount(prev => Math.max(0, prev - 1));
     };
 
+    const clearRefreshContext = ()=>{
+        setRefreshVersion(0);
+        setRefreshingCount(0);
+    }
+
     return (
         <HomeRefreshContext.Provider
             value={{
@@ -32,6 +38,7 @@ export const HomeRefreshProvider = ({ children }: any) => {
                 refreshingCount,
                 startRefresh,
                 endRefresh,
+                clearRefreshContext
             }}
         >
             {children}

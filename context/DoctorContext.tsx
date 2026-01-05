@@ -17,20 +17,25 @@ interface Doctor {
     updatedAt: string;
 }
 
-interface ReportContextType {
+interface DoctorContextType {
     doctorData: Doctor[] | null,
-    setDoctorData: (data: Doctor[] | null) => void
+    setDoctorData: (data: Doctor[] | null) => void,
+    clearDoctorContext: () => void
 }
 
-export const DoctorDataContext = createContext<ReportContextType>({
+export const DoctorDataContext = createContext<DoctorContextType>({
     doctorData: null,
-    setDoctorData: () => { }
+    setDoctorData: () => {},
+    clearDoctorContext: () => {}
 });
 
 export const DoctorDataProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [doctorData, setDoctorData] = useState<Doctor[] | null>(null);
+    const clearDoctorContext = () =>{
+        setDoctorData(null);
+    }
     return (
-        <DoctorDataContext.Provider value={{ doctorData, setDoctorData }}>
+        <DoctorDataContext.Provider value={{ doctorData, setDoctorData, clearDoctorContext }}>
             {children}
         </DoctorDataContext.Provider>
     )

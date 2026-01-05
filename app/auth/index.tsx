@@ -64,7 +64,7 @@ export default function AuthScreen() {
             console.log("API responce ", apiresponse);
             
 
-            if(apiresponse.status === 200){
+            if (apiresponse.status === 200 || apiresponse.status === 201){
                 setAuthData(
                     { 
                         id: apiresponse?.data?.createdPatient?.id.toString(),
@@ -78,7 +78,7 @@ export default function AuthScreen() {
                 )
             }else{
                 logout();
-                Alert.alert("Error",apiresponse.error);
+                Alert.alert("Error",apiresponse.message);
             }
         } catch (error) {
             console.log(error);

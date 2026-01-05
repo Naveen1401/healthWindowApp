@@ -6,12 +6,12 @@ import { useLocalSearchParams, router } from 'expo-router';
 
 const ReportViewerScreen = () => {
     const { url } = useLocalSearchParams<{ url: string }>();
-    const decodedUrl = decodeURIComponent(url || '');
+    const pdfUrl = url ?? '';
 
     return (
         <SafeAreaView style={styles.container}>
             <Pdf
-                source={{ uri: decodedUrl, cache: true }}
+                source={{ uri: pdfUrl, cache: true }}
                 style={styles.pdf}
                 trustAllCerts={false}
                 onLoadComplete={(numberOfPages, filePath) => {

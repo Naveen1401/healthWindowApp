@@ -41,8 +41,10 @@ const OPSWidget: React.FC = () => {
 
         setLoading(true);
         try {
+            console.log("Patient ID: ", user.id);
+            
             const response = await callApi({
-                url: `${process.env.EXPO_PUBLIC_BACKEND_SERVER}/common/listOPDs?hospital_id=1&date=${date.toISOString().split("T")[0]}&page=0&size=10`,
+                url: `${process.env.EXPO_PUBLIC_BACKEND_SERVER}/common/listOPDs?patient_id=${user.id}&date=${date.toISOString().split("T")[0]}&page=0&size=10`,
                 headers: {
                     "Patient-Id": user.id,
                 },
@@ -86,7 +88,7 @@ const OPSWidget: React.FC = () => {
             {/* Rows */}
             {opsList.map((item, index) => (
                 <View key={index} style={styles.row}>
-                    <Text style={styles.colDoctor}>{item.doctor_name}</Text>
+                    <Text style={styles.colDoctor}>Dr. {item.doctor_name}</Text>
                     <Text style={styles.colHospital}>{item.hospital_name}</Text>
                     <Text
                         style={styles.colComplaint}

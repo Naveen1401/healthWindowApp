@@ -58,20 +58,20 @@ const ReportWidget = () => {
 
     const { refreshVersion, startRefresh, endRefresh } = useHomeRefresh();
     
-        useEffect(() => {
-            console.log("Fetching new reports");
-            const run = async () => {
-                startRefresh();
-                if (!reportData && !hasFetchedInitial) {
-                    await fetchReports();
-                } else {
-                    setHasFetchedInitial(true);
-                }
-                endRefresh();
-            };
-    
-            run();
-        }, [refreshVersion]);
+    useEffect(() => {
+        console.log("Fetching new reports");
+        const run = async () => {
+            startRefresh();
+            if (!reportData && !hasFetchedInitial) {
+                await fetchReports();
+            } else {
+                setHasFetchedInitial(true);
+            }
+            endRefresh();
+        };
+
+        run();
+    }, [refreshVersion]);
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
