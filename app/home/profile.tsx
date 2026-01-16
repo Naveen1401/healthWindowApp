@@ -14,7 +14,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { AuthContext } from "@/context/AuthContext";
 import useApi from "@/CustomHooks/useCallAPI";
 import { BackSVG } from "@/assets/svgComponents/generalSVGs";
-import { useNavigation } from "expo-router";
+import { useNavigation, useRouter } from "expo-router";
 import GlobalStyleSheet from "../globalStyle";
 import Button from "@/components/Button";
 import { ReportDataContext } from "@/context/ReportContext";
@@ -40,6 +40,7 @@ export default function Profile({ navigation }: any) {
 
   const [isEditing, setIsEditing] = useState(false);
   const navigate = useNavigation();
+  const router =useRouter();
 
   // 🔹 Top Navigation Buttons: Cancel on Left, Save/Edit on Right
   useLayoutEffect(() => {
@@ -179,6 +180,7 @@ export default function Profile({ navigation }: any) {
             </TouchableOpacity>
         </View>
       )}
+      {/* <View style={{ flex: 1 }}> */}
       <View style={{padding:20}}>
         <TouchableOpacity
           onPress={() => {
@@ -251,7 +253,23 @@ export default function Profile({ navigation }: any) {
           <Text style={[styles.value, { color: "#555" }]}>{email}</Text>
         </View>
 
-        <Button title="Log Out" variant='danger-inverted' onPress={handleLogout} />
+        <TouchableOpacity
+          style={styles.deleteRow}
+          onPress={() => router.push('/home/deleteAccount')}
+        >
+          <Text style={styles.deleteText}>Delete account</Text>
+          <Text style={{fontSize: 20, paddingRight:10}}>&rsaquo;</Text>
+        </TouchableOpacity>
+        
+
+        <View style={styles.logoutContainer}>
+          <Button
+            title="Log Out"
+            variant="danger"
+            onPress={handleLogout}
+          />
+        </View>
+        {/* </View> */}
 
         {loading && (
           <ActivityIndicator size="large" color="#0000ff" style={{ marginTop: 24 }} />
@@ -330,5 +348,30 @@ const styles = StyleSheet.create({
     left: 16,   // distance from left
     justifyContent: "center",
     alignItems: "center",
+  },
+  deleteRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 14,
+    borderTopWidth: 1,
+    borderColor: "#E5E7EB",
+    marginTop: 16,
+  },
+
+  deleteText: {
+    fontSize: 16,
+    color: "#111827", // normal text color
+  },
+
+  arrow: {
+    fontSize: 18,
+    color: "#9CA3AF",
+  },
+  logoutContainer: {
+    padding: 20,
+    borderTopWidth: 1,
+    borderColor: "#E5E7EB",
+    backgroundColor: "#F9FAFB",
   },
 });

@@ -68,6 +68,7 @@ export default function AuthScreen() {
                 setAuthData(
                     { 
                         id: apiresponse?.data?.createdPatient?.id.toString(),
+                        user_id: apiresponse?.data?.createdPatient?.user_id.toString(),
                         name: apiresponse?.data?.createdPatient?.first_name + " " + apiresponse?.data?.createdPatient?.last_name,
                         email: user.email,
                         imageURL: apiresponse?.data?.createdPatient?.image_url,

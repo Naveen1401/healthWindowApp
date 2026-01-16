@@ -7,6 +7,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
+  user_id: string;
   imageURL: string;
   phoneNo: string;
 }
