@@ -157,7 +157,7 @@ export default function AuthScreen() {
             <View style={style.textContainer}>
                 <View style={{marginBottom: 20}}>
                     <Text style={{ fontSize: 20, color: "#fff", }}>Wellcome to</Text>
-                    <Text style={style.headerText}>WellCurely</Text>
+                    <Text style={style.headerText}>MyBioTick</Text>
                 </View>
                 <TouchableOpacity style={style.signInButton} onPress={handleGoogleSignIn}>
                     <GoogleSVG style={{ marginRight: 20 }} height={20} width={20} />

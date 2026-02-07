@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-               BuildableName = "Wellcurly.app"
-               BlueprintName = "Wellcurly"
-               ReferencedContainer = "container:Wellcurly.xcodeproj">
+               BuildableName = "MyBioTick.app"
+               BlueprintName = "MyBioTick"
+               ReferencedContainer = "container:MyBioTick.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "00E356ED1AD99517003FC87E"
-               BuildableName = "WellcurlyTests.xctest"
-               BlueprintName = "WellcurlyTests"
-               ReferencedContainer = "container:Wellcurly.xcodeproj">
+               BuildableName = "MyBioTickTests.xctest"
+               BlueprintName = "MyBioTickTests"
+               ReferencedContainer = "container:MyBioTick.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -55,9 +55,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "Wellcurly.app"
-            BlueprintName = "Wellcurly"
-            ReferencedContainer = "container:Wellcurly.xcodeproj">
+            BuildableName = "MyBioTick.app"
+            BlueprintName = "MyBioTick"
+            ReferencedContainer = "container:MyBioTick.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -72,9 +72,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "Wellcurly.app"
-            BlueprintName = "Wellcurly"
-            ReferencedContainer = "container:Wellcurly.xcodeproj">
+            BuildableName = "MyBioTick.app"
+            BlueprintName = "MyBioTick"
+            ReferencedContainer = "container:MyBioTick.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
